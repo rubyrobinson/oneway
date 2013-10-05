@@ -1,4 +1,4 @@
-package oneway.dumb;
+package oneway.g5;
 
 import oneway.sim.MovingCar;
 import oneway.sim.Parking;
@@ -9,7 +9,7 @@ public class Player extends oneway.sim.Player
 {
     // if the parking lot is almost full
     // it asks the opposite direction to yield
-    private static double AlmostFull = 0.8;
+    private static double AlmostFull = 0.6;
 
     public Player() {}
 
@@ -52,8 +52,14 @@ public class Player extends oneway.sim.Player
         
         // find out almost full parking lot
         for (int i = 1; i != nsegments; ++i) {
-            if (left[i].size() + right[i].size() + abs(trafficFlownow[i-1])+abs(trafficFlownow[i])
-                > (capacity[i]+nblocks[i-1]/2+nblocks[i]/2) * AlmostFull) {
+        	System.out.printf("the %d block's length is %d\n", i, nblocks[i]);
+        	System.out.printf("the %d block's traffice is %d\n", i, trafficFlownow[i]);
+        	System.out.printf("the %d parking lot's capacity is %d\n", i, capacity[i]);
+        	System.out.printf("the %d parking left is %d\n", i, left[i].size());
+        	System.out.printf("the %d parking right is %d\n", i, right[i].size());
+        	if (left[i].size() + right[i].size() + abs(trafficFlownow[i-1])+abs(trafficFlownow[i])
+                > (capacity[i]) * AlmostFull) {
+            	System.out.printf("we are in danger!!\n");
                 indanger[i] = true;
             }            
         }
@@ -62,13 +68,11 @@ public class Player extends oneway.sim.Player
             // if right bound has car
             // and the next parking lot is not in danger
             if (right[i].size() > 0 &&
-                !indanger[i+1] &&
                 !hasTraffic(movingCars, i, -1)) {
                 rlights[i] = true;
             }
             
             if (left[i+1].size() > 0 &&
-                !indanger[i] &&
                 !hasTraffic(movingCars, i, 1)) {
                 llights[i] = true;
             }
@@ -86,6 +90,19 @@ public class Player extends oneway.sim.Player
             	lesstrafficnow = lesstraffic(trafficFlownow, left, right);
             }
         }
+        for (int i =1 ; i!=nsegments; i++){
+        	if (indanger[i]) {
+        		System.out.printf("%d is in danger", i);
+        		rlights[i-1] = false;
+        		llights[i] = false;
+        	}
+        }
+        for (int i=0; i!=nsegments; i++){
+        	if (rlights[i])
+        		llights[i] = false;
+        		
+        }
+        
     }
 
 
