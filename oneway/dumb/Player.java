@@ -1,4 +1,4 @@
-package oneway.g5;
+package oneway.dumb;
 
 import oneway.sim.MovingCar;
 import oneway.sim.Parking;
@@ -115,9 +115,19 @@ public class Player extends oneway.sim.Player
             }
             else
             {
-                segmentFlow[car.segment]++;
+            	if(car.dir > 0)
+            	{
+            		segmentFlow[car.segment]++;
+            	}
+            	else
+            	{
+            		segmentFlow[car.segment]--;
+            	}
             }
         }
+        
+        System.out.println(Arrays.toString(segmentFlow));
+        System.out.println("************");
         return segmentFlow;
     }
     
