@@ -1,10 +1,10 @@
-package oneway.dumb;
+package oneway.g5;
 
 import oneway.sim.MovingCar;
 import oneway.sim.Parking;
 
 import java.util.*;
-
+import static java.lang.Math.abs;
 public class Player extends oneway.sim.Player
 {
     // if the parking lot is almost full
@@ -45,10 +45,15 @@ public class Player extends oneway.sim.Player
 
         boolean[] indanger = new boolean[nsegments+1];
         
+        int[] trafficFlownow = new int[nsegments];
+        
+        trafficFlownow = trafficFlow(movingCars);
+    
+        
         // find out almost full parking lot
         for (int i = 1; i != nsegments; ++i) {
-            if (left[i].size() + right[i].size() 
-                > capacity[i] * AlmostFull) {
+            if (left[i].size() + right[i].size() + abs(trafficFlownow[i-1])+abs(trafficFlownow[i])
+                > (capacity[i]+nblocks[i-1]/2+nblocks[i]/2) * AlmostFull) {
                 indanger[i] = true;
             }            
         }
@@ -71,12 +76,14 @@ public class Player extends oneway.sim.Player
             // if both left and right is on
             // find which dir is in more danger
             if (rlights[i] && llights[i]) {
-                double lratio = 1.0 * (left[i+1].size() + right[i+1].size()) / capacity[i+1];
+                /*double lratio = 1.0 * (left[i+1].size() + right[i+1].size()) / capacity[i+1];
                 double rratio = 1.0 * (left[i].size() + right[i].size()) / capacity[i];
                 if (lratio > rratio)
                     rlights[i] = false;
                 else
-                    llights[i] = false;
+                    llights[i] = false;*/
+            	int[] lesstrafficnow = new int[nsegments];
+            	lesstrafficnow = lesstraffic(trafficFlownow, left, right);
             }
         }
     }
@@ -90,8 +97,53 @@ public class Player extends oneway.sim.Player
         }
         return false;
     }
+    
+    private int[] trafficFlow(MovingCar[] cars){
+        int[] segmentFlow = new int[nsegments];
 
+        for(int i=0; i<segmentFlow.length; i++)
+        {
+            segmentFlow[i] = 0;
+        }
 
+        for (MovingCar car : cars){
+            
+            if(segmentFlow[car.segment]==0)
+            {
+               segmentFlow[car.segment]++;
+               segmentFlow[car.segment] *= car.dir; 
+            }
+            else
+            {
+                segmentFlow[car.segment]++;
+            }
+        }
+        return segmentFlow;
+    }
+    
+    private int[] lesstraffic(int[] trafficflow, Parking[] left, Parking[] right) {
+    	int[] lesstraffic = new int[nsegments];
+    	int lefttraffic;
+    	int righttraffic;
+    	for (int i = 1; i != nsegments; ++i) {
+    		lefttraffic = 0;
+    		righttraffic =0;
+    		if (trafficflow[i]<0 && trafficflow[i-1]>0){
+    			//opposite direction, try to pass the parking lot
+    			//The total number of cars on both segment and parking lot trying to go left/right
+    			lefttraffic = -trafficflow[i]+left[i].size();
+    			righttraffic = trafficflow[i-1]+right[i].size();
+    		}
+            if (lefttraffic < righttraffic) {
+                lesstraffic[i] = -lefttraffic;
+            }            
+            else
+            	lesstraffic[i]=righttraffic;
+        }
+    	return lesstraffic;
+    	
+    }
+    
     private int nsegments;
     private int[] nblocks;
     private int[] capacity;
