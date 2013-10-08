@@ -34,8 +34,10 @@ public class Player extends oneway.sim.Player {
 		// will be delivered in time and the parking lot is never full
 
 		for (int i = 0; i != nsegments; ++i) {
-			llights[i] = false;
-			rlights[i] = false;
+			//if (right[i].size() > 0 || left[i + 1].size() > 0){
+			llights[i] = true;
+			rlights[i] = true;
+			//}
 		}
 
 		boolean[] indanger = new boolean[nsegments + 1];
@@ -46,17 +48,17 @@ public class Player extends oneway.sim.Player {
 
 		// find out almost full parking lot
 		for (int i = 1; i != nsegments; ++i) {
-			System.out.printf("the %d block's length is %d\n", i, nblocks[i]);
-			System.out.printf("the %d block's traffice is %d\n", i,
-					trafficFlownow[i]);
-			System.out.printf("the %d parking lot's capacity is %d\n", i,
-					capacity[i]);
-			System.out.printf("the %d parking left is %d\n", i, left[i].size());
-			System.out.printf("the %d parking right is %d\n", i,
-					right[i].size());
+//			System.out.printf("the %d block's length is %d\n", i, nblocks[i]);
+//			System.out.printf("the %d block's traffice is %d\n", i,
+//					trafficFlownow[i]);
+//			System.out.printf("the %d parking lot's capacity is %d\n", i,
+//					capacity[i]);
+//			System.out.printf("the %d parking left is %d\n", i, left[i].size());
+//			System.out.printf("the %d parking right is %d\n", i,
+//					right[i].size());
 			if (left[i].size() + right[i].size() + abs(trafficFlownow[i - 1])
-					+ abs(trafficFlownow[i]) > (capacity[i]) * AlmostFull) {
-				System.out.printf("we are in danger!!\n");
+					+ abs(trafficFlownow[i]) > (capacity[i])-2) {
+//				System.out.printf("we are in danger!!\n");
 				indanger[i] = true;
 			}
 		}
@@ -64,61 +66,75 @@ public class Player extends oneway.sim.Player {
 		for (int i = 0; i != nsegments; ++i) {
 			// if right bound has car
 			// and the next parking lot is not in danger
-			if (right[i].size() > 0 && !hasTraffic(movingCars, i, -1)) {
-				rlights[i] = true;
+			//if (right[i].size() > 0 && !hasTraffic(movingCars, i, -1)) {
+			if (hasTraffic(movingCars, i, -1)) {	
+				rlights[i] = false;
 			}
 
-			if (left[i + 1].size() > 0 && !hasTraffic(movingCars, i, 1)) {
-				llights[i] = true;
+			//if (left[i + 1].size() > 0 && !hasTraffic(movingCars, i, 1)) {
+			if (hasTraffic(movingCars, i, 1)) {
+				llights[i] = false;
 			}
 
 			// if both left and right is on
 			// find which dir is in more danger
-			if (rlights[i] && llights[i]) {
-				/*
-				 * double lratio = 1.0 * (left[i+1].size() + right[i+1].size())
-				 * / capacity[i+1]; double rratio = 1.0 * (left[i].size() +
-				 * right[i].size()) / capacity[i]; if (lratio > rratio)
-				 * rlights[i] = false; else llights[i] = false;
-				 */
-				int[] lesstrafficnow = new int[nsegments];
-				lesstrafficnow = lesstraffic(trafficFlownow, left, right);
+			if (rlights[i] && llights[i] && right[i].size() > 0 &&  left[i + 1].size() > 0) {
+				
+				 //double lratio = 1.0 * (left[i+1].size() + right[i+1].size()) / capacity[i+1];
+	             //double rratio = 1.0 * (left[i].size() + right[i].size()) / capacity[i];
+	             //if (lratio > rratio)
+	                    rlights[i] = false;
+	               // else
+	                 //   llights[i] = false;
 			}
 		}
 		for (int i = 1; i != nsegments; i++) {
 			if (indanger[i]) {
-				System.out.printf("%d is in danger", i);
+//				System.out.printf("%d is in danger", i);
 				rlights[i - 1] = false;
 				llights[i] = false;
 			}
 		}
-		for (int i = 0; i != nsegments; i++) {
+	/*	for (int i = 0; i != nsegments; i++) {
 			if (rlights[i])
 				llights[i] = false;
 
-		}
+		}*/
+
+		//incase of no car is moving due to inDanger
+		//check for such condidtion, then open up a light
+		//one by one
 		boolean alloff = true;
 		boolean nonetraffic = true;
+
 		for (int i = 0; i != nsegments; i++) {
-			if (rlights[i] || llights[i])
+			if ((rlights[i]&& right[i].size() > 0)|| (llights[i] &&left[i + 1].size() > 0))
 				alloff = false;
 			if (trafficFlownow[i] != 0)
 				nonetraffic = false;
 		}
+
 		if (alloff && nonetraffic) {
 			for (int i = 0; i != nsegments; i++) {
 				if (left[i + 1].size() > 0) {
 					llights[i] = true;
+					for (int j=i; j !=nsegments; j++){
+						llights[j] = true;
+					}
 					return;
 				}
 			}
 			for (int i = nsegments; i != 1; i--)
 			if (right[i-1].size() > 0) {
 				rlights[i] = true;
+				for (int j=i; j !=nsegments; j++){
+					rlights[j] = true;
+				}
 				return;
+				
 			}
 		}
-		}
+	}
 
 
 
@@ -152,8 +168,8 @@ public class Player extends oneway.sim.Player {
 			}
 		}
 
-		System.out.println(Arrays.toString(segmentFlow));
-		System.out.println("************");
+		//System.out.println(Arrays.toString(segmentFlow));
+		//System.out.println("************");
 		return segmentFlow;
 	}
 
