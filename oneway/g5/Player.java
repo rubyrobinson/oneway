@@ -61,6 +61,22 @@ public class Player extends oneway.sim.Player {
 			int[] trafficFlownow = new int[nsegments];
 			trafficFlownow = trafficFlow(movingCars);
 
+            // checks for crash prevention between 3 segments
+            for(int i = 0; i < nsegments -2; i++){
+				if(llights[i+1] && rlights[i+1]){
+				    for(MovingCar car1 : movingCars){
+						if(car1.segment == i && car1.dir > 0){
+							for(MovingCar car2 : movingCars){
+								if(car2.segment == i+2 && car2.dir < 0){
+									if(car1.block == car2.block)
+					                    rlights[i+1] = false;
+								}	
+							}
+						}
+					}
+				}
+			}
+
 			// find out almost full parking lots
 			for (int i = 1; i != nsegments; ++i) {
 				if (left[i].size() + right[i].size()
