@@ -106,6 +106,8 @@ public class Player extends oneway.sim.Player {
 					if (lefttime > righttime) {
 						if (!indanger[i + 1]) {
 							llights[i] = false;
+							if (!rlights[i])
+								rlights[i-1] = false; 
 							System.out
 									.printf("shut off the left light %d\n", i);
 						} else {
@@ -115,6 +117,8 @@ public class Player extends oneway.sim.Player {
 					} else {
 						if (!indanger[i - 1]) {
 							rlights[i - 1] = false;
+							if (!llights[i-1])
+								llights[i] = false;
 							System.out.printf("shut off the right light %d\n",
 									i);
 						} else {
