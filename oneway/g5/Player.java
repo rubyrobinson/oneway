@@ -32,6 +32,7 @@ public class Player extends oneway.sim.Player {
 
 	public void setLights(MovingCar[] movingCars, Parking[] left,
 			Parking[] right, boolean[] llights, boolean[] rlights) {
+
 		for (MovingCar car : movingCars) {
 			if (!(car.equals(null))) {
 				System.out.println(car.block);
@@ -46,19 +47,21 @@ public class Player extends oneway.sim.Player {
 
 		switch (this.state) {
 
+
+		//set all lights to green -> turn off lights if in danger -> flush if deadlock
 		case NORMAL: {
+
+			//set all lights to green
 			for (int i = 0; i != nsegments; ++i) {
 				llights[i] = true;
 				rlights[i] = true;
 			}
 
 			boolean[] indanger = new boolean[nsegments + 1];
-
 			int[] trafficFlownow = new int[nsegments];
-
 			trafficFlownow = trafficFlow(movingCars);
 
-			// find out almost full parking lot
+			// find out almost full parking lots
 			for (int i = 1; i != nsegments; ++i) {
 				if (left[i].size() + right[i].size()
 						+ abs(trafficFlownow[i - 1]) + abs(trafficFlownow[i]) > (capacity[i]) - 2) {
