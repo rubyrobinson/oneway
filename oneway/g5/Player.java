@@ -469,21 +469,18 @@ public class Player extends oneway.sim.Player {
 		return totalRight - right[0].size();
 	}
 
-	public int cleartime(int segment, MovingCar[] cars) {
-		int farthestBlock = -1;
+public int cleartime(int segment, MovingCar[] cars) {
+		int farthestBlock = 0;
+		int segmentLength = nblocks[segment];
 		for (MovingCar car : cars) {
 			if (car.segment == segment) {
+				int position = car.block;
 				if(car.dir > 0){
-					if (car.block < farthestBlock) {
+					position = segmentLength - position;
+				}
+					if (position > farthestBlock) {
 						farthestBlock = car.block;
 					}
-				}
-				else
-				{
-					if (car.block > farthestBlock) {
-						farthestBlock = car.block;
-					}
-				}
 			}
 		}
 		return farthestBlock;
