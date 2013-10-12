@@ -10,18 +10,18 @@ public class Player extends oneway.sim.Player {
 	// if the parking lot is almost full
 	// it asks the opposite direction to yield
 	private static double AlmostFull = 0.6;
-
+	
 	// private static boolean flush;
-
+	
 	public enum States {
 		NORMAL, FLUSH
 	}
-
+	
 	private States state;
-
+	
 	public Player() {
 	}
-
+	
 	public void init(int nsegments, int[] nblocks, int[] capacity) {
 		this.nsegments = nsegments;
 		this.nblocks = nblocks;
@@ -29,266 +29,297 @@ public class Player extends oneway.sim.Player {
 		this.state = States.NORMAL;
 		// this.flush = false;
 	}
-
+	
 	public void setLights(MovingCar[] movingCars, Parking[] left,
-			Parking[] right, boolean[] llights, boolean[] rlights) {
-/*
-		for (MovingCar car : movingCars) {
-			if (!(car.equals(null))) {
-				System.out.println(car.block);
-				System.out.println(car.segment);
-			}
-		}
-*/
+						  Parking[] right, boolean[] llights, boolean[] rlights) {
+		/*
+		 for (MovingCar car : movingCars) {
+		 if (!(car.equals(null))) {
+		 System.out.println(car.block);
+		 System.out.println(car.segment);
+		 }
+		 }
+		 */
 		// variables
 		boolean goLeft = true;
 		int totLeft = 0;
 		int totRight = 0;
-
+		
 		switch (this.state) {
-
-
-		//set all lights to green -> turn off lights if in danger -> flush if deadlock
-		case NORMAL: {
-			//set all lights to green
-			for (int i = 0; i != nsegments; ++i) {
-				llights[i] = true;
-				rlights[i] = true;
-			}
-
-			boolean[] indanger = new boolean[nsegments + 1];
-			int[] trafficFlownow = new int[nsegments];
-			trafficFlownow = trafficFlow(movingCars);
-
-            // checks for crash prevention between 3 segments
-            for(int i = 0; i < nsegments -2; i++){
-				if(llights[i+1] && rlights[i+1]){
-					for(MovingCar car1 : movingCars){
-						if(car1.segment == i && car1.dir > 0){
-							for(MovingCar car2 : movingCars){
-								if(car2.segment == i+2 && car2.dir < 0){
-									if((nblocks[i]-car1.block+1) == car2.block){
-										rlights[i+1] = false;
-									}
-								}	
+				
+				
+				//set all lights to green -> turn off lights if in danger -> flush if deadlock
+			case NORMAL: {
+				//set all lights to green
+				for (int i = 0; i != nsegments; ++i) {
+					llights[i] = true;
+					rlights[i] = true;
+				}
+				
+				boolean[] indanger = new boolean[nsegments + 1];
+				int[] trafficFlownow = new int[nsegments];
+				trafficFlownow = trafficFlow(movingCars);
+				
+				// checks for crash prevention between 3 segments
+				for(int i = 0; i < nsegments -2; i++){
+					if(llights[i+1] && rlights[i+1]){
+						for(MovingCar car1 : movingCars){
+							if(car1.segment == i && car1.dir > 0){
+								for(MovingCar car2 : movingCars){
+									if(car2.segment == i+2 && car2.dir < 0){
+										if((nblocks[i]-car1.block+1) == car2.block){
+											rlights[i+1] = false;
+										}
+									}	
+								}
 							}
 						}
 					}
 				}
-			}
-
-			// checks for crash prevention between 2 segments and a parking lot
-			// case: ]--- --- 01>[i]--- --- ---[<1]
-			for(int i = 0; i < nsegments - 2; i++){
-				if(llights[i] && left[i+1].size() > 0){
-					for(MovingCar car : movingCars){
-						if(car.segment == i && car.dir > 0 && (nblocks[i] - car.block) == 0 && rlights[i])
-							llights[i] = false;
-					}
-				}
-			}
-			// case: [1>]--- --- ---[i]<01--- ---
-			for(int i = 0; i < nsegments - 1; i++){
-				if(rlights[i] && right[i].size() > 0){
-					for(MovingCar car : movingCars){
-						if(car.segment == i+1 && car.dir < 0 && car.block == 0 && llights[i])
-							rlights[i] = false;
-					}
-				}
-			}
-
-			// checks for edge cases of the 3 segment crash prevention
-			for(MovingCar car : movingCars){
-				if(car.segment == (nsegments-2) && car.dir > 0 && (nblocks[nsegments-2] - car.block) == 1
-					&& rlights[nsegments-1])
-					llights[nsegments-1] = false;
-				if(car.segment == 1 && car.dir < 0 && car.block == 0
-					&& llights[0])
-					rlights[0] = false;
-			}
-
-			// find out almost full parking lots
-			for (int i = 1; i != nsegments; ++i) {
-				if (left[i].size() + right[i].size()
-						+ abs(trafficFlownow[i - 1]) + abs(trafficFlownow[i]) > (capacity[i]) - 2) {
-					// System.out.printf("we are in danger!!\n");
-					indanger[i] = true;
-				}
-			}
-
-			for (int i = 0; i != nsegments; ++i) {
-				// if right bound has car
-				// and the next parking lot is not in danger
-				// if (right[i].size() > 0 && !hasTraffic(movingCars, i, -1)) {
-				if (hasTraffic(movingCars, i, -1)) {
-					rlights[i] = false;
-				}
-
-				// if (left[i + 1].size() > 0 && !hasTraffic(movingCars, i, 1))
-				// {
-				if (hasTraffic(movingCars, i, 1)) {
-					llights[i] = false;
-				}
-
-				// if both left and right is on
-				// find which dir is in more danger
-				if (rlights[i] && llights[i] && right[i].size() > 0
-						&& left[i + 1].size() > 0) {
-
-					// double lratio = 1.0 * (left[i+1].size() +
-					// right[i+1].size()) / capacity[i+1];
-					// double rratio = 1.0 * (left[i].size() + right[i].size())
-					// / capacity[i];
-					// if (lratio > rratio)
-					rlights[i] = false;
-					// else
-					// llights[i] = false;
-				}
-			}
-			for (int i = 1; i != nsegments; i++) {
-				if (indanger[i]) {
-					System.out.printf("%d is in danger\n", i);
-					int lefttime = cleartime(i - 1, movingCars);
-					System.out.printf("%d the left time is\n ", lefttime);
-					int righttime = cleartime(i, movingCars);
-					System.out.printf("%d the right time is \n", righttime);
-					if (lefttime > righttime) {
-						if (!indanger[i + 1]) {
-							llights[i] = false;
-							if (!rlights[i])
-								rlights[i-1] = false; 
-							System.out
-									.printf("shut off the left light %d\n", i);
-						} else {
-							llights[i] = false;
-							rlights[i - 1] = false;
-						}
-					} else {
-						if (!indanger[i - 1]) {
-							rlights[i - 1] = false;
-							if (!llights[i-1])
+				
+				// checks for crash prevention between 2 segments and a parking lot
+				// case: ]--- --- 01>[i]--- --- ---[<1]
+				for(int i = 0; i < nsegments - 2; i++){
+					if(llights[i] && left[i+1].size() > 0){
+						for(MovingCar car : movingCars){
+							if(car.segment == i && car.dir > 0 && (nblocks[i] - car.block) == 0 && rlights[i])
 								llights[i] = false;
-							System.out.printf("shut off the right light %d\n",
-									i);
+						}
+					}
+				}
+				// case: [1>]--- --- ---[i]<01--- ---
+				for(int i = 0; i < nsegments - 1; i++){
+					if(rlights[i] && right[i].size() > 0){
+						for(MovingCar car : movingCars){
+							if(car.segment == i+1 && car.dir < 0 && car.block == 0 && llights[i])
+								rlights[i] = false;
+						}
+					}
+				}
+				
+				// checks for edge cases of the 3 segment crash prevention
+				for(MovingCar car : movingCars){
+					if(car.segment == (nsegments-2) && car.dir > 0 && (nblocks[nsegments-2] - car.block) == 1
+					   && rlights[nsegments-1])
+						llights[nsegments-1] = false;
+					if(car.segment == 1 && car.dir < 0 && car.block == 0
+					   && llights[0])
+						rlights[0] = false;
+				}
+				
+				// find out almost full parking lots
+				
+				for (int i = 1; i != nsegments; ++i) {
+					
+					int goingright = 0;
+					
+					int goingleft = 0;
+					
+					if (trafficFlownow[i - 1]>0)
+						
+						goingright = trafficFlownow[i - 1];
+					
+					if (trafficFlownow[i]<0)
+						
+						goingleft = -trafficFlownow[i];
+					
+					if (left[i].size() + right[i].size()
+						
+						+ goingright+ goingleft > (capacity[i]) - 2) {
+						
+						// System.out.printf("we are in danger!!\n");
+						
+						indanger[i] = true;
+						
+					}
+					
+				}
+				for (int i = 0; i != nsegments; ++i) {
+					// if right bound has car
+					// and the next parking lot is not in danger
+					// if (right[i].size() > 0 && !hasTraffic(movingCars, i, -1)) {
+					if (hasTraffic(movingCars, i, -1)) {
+						rlights[i] = false;
+					}
+					
+					// if (left[i + 1].size() > 0 && !hasTraffic(movingCars, i, 1))
+					// {
+					if (hasTraffic(movingCars, i, 1)) {
+						llights[i] = false;
+					}
+					
+					// if both left and right is on
+					// find which dir is in more danger
+					if (rlights[i] && llights[i] && right[i].size() > 0
+						&& left[i + 1].size() > 0) {
+						
+						// double lratio = 1.0 * (left[i+1].size() +
+						// right[i+1].size()) / capacity[i+1];
+						// double rratio = 1.0 * (left[i].size() + right[i].size())
+						// / capacity[i];
+						// if (lratio > rratio)
+						rlights[i] = false;
+						// else
+						// llights[i] = false;
+					}
+				}
+				for (int i = 1; i != nsegments; i++) {
+					if (indanger[i]) {
+						System.out.printf("%d is in danger\n", i);
+						int lefttime = cleartime(i - 1, movingCars);
+						System.out.printf("%d the left time is\n ", lefttime);
+						int righttime = cleartime(i, movingCars);
+						System.out.printf("%d the right time is \n", righttime);
+						if (lefttime > righttime) {
+							if (!indanger[i + 1]) {
+								llights[i] = false;
+								if (!rlights[i])
+									rlights[i-1] = false; 
+								System.out
+								.printf("shut off the left light %d\n", i);
+							} else {
+								llights[i] = false;
+								rlights[i - 1] = true;
+								System.out
+								.printf("shut off the left light %d\n", i);
+								System.out
+								.printf("turn on the right light %d\n", i-1);
+							}
 						} else {
-							llights[i] = false;
-							rlights[i - 1] = false;
+							if (!indanger[i - 1]) {
+								rlights[i - 1] = false;
+								if (!llights[i-1])
+									llights[i] = false;
+								System.out.printf("shut off the right light %d\n",
+												  i);
+							} else {
+								llights[i] = true;
+								rlights[i - 1] = false;
+								System.out
+								.printf("shut off the left light %d\n", i);
+								System.out
+								.printf("turn on the right light %d\n", i-1);
+							}
 						}
+						// rlights[i - 1] = false;
+						// llights[i] = false;
 					}
-					// rlights[i - 1] = false;
-					// llights[i] = false;
 				}
-			}
-			/*
-			 * for (int i = 0; i != nsegments; i++) { if (rlights[i]) llights[i]
-			 * = false;
-			 * 
-			 * }
-			 */
-
-			// in case of no car is moving due to inDanger
-			// check for such condition, then open up a light
-			// one by one
-			boolean alloff = true;
-			boolean nonetraffic = true;
-
-			for (int i = 0; i != nsegments; i++) {
-				if ((rlights[i] && right[i].size() > 0)
-						|| (llights[i] && left[i + 1].size() > 0))
-					alloff = false;
-				if (trafficFlownow[i] != 0)
-					nonetraffic = false;
-			}
-
-			// checking priority of flushing left or right
-			totLeft = sumLeft(movingCars, left);
-			totRight = sumRight(movingCars, right);
-
-			if (totLeft > totRight)
-				goLeft = true;
-			else
-				goLeft = false;
-			// boolean sameway = sameWay(movingCars);
-			/*
-			 * if (sameway) { int[] carOnRoad = trafficFlow(movingCars); boolean
-			 * dirright = false; boolean dirleft = false; for (int value:
-			 * carOnRoad){ if(value > 0) dirright = true; if (value <0) dirleft
-			 * = true; }
-			 * //System.out.println("++++++++++We are the same direction*********"
-			 * ); if (dirright || dirleft){ for (int i = 0; i != nsegments; ++i)
-			 * { llights[i] = false; rlights[i] = false; }} //rlights[0]=false;
-			 * //llights[nsegments]=false;
-			 * 
-			 * totLeft = sumLeft(movingCars, left); totRight =
-			 * sumRight(movingCars, right);
-			 * 
-			 * 
-			 * if (dirright){ if (totRight !=0) flushright(rlights); else
-			 * if(totLeft !=0) flushleft(llights); if (totLeft==0 && totRight
-			 * ==0) this.state= States.NORMAL; } if (dirleft){ if (totLeft !=0)
-			 * flushleft(llights); else if(totRight !=0) flushright(rlights); if
-			 * (totLeft==0 && totRight ==0) this.state= States.NORMAL; } }
-			 */
-			// check if flush condition is met
-			if (alloff && nonetraffic) {
+				/*
+				 * for (int i = 0; i != nsegments; i++) { if (rlights[i]) llights[i]
+				 * = false;
+				 * 
+				 * }
+				 */
+				
+				// in case of no car is moving due to inDanger
+				// check for such condition, then open up a light
+				// one by one
+				boolean alloff = true;
+				boolean nonetraffic = true;
+				
 				for (int i = 0; i != nsegments; i++) {
-					if (left[i + 1].size() > 0) {
-						this.state = States.FLUSH;
-						llights[i] = true;
-						for (int j = i; j != nsegments; j++) {
-							llights[j] = true;
+					if ((rlights[i] && right[i].size() > 0)
+						|| (llights[i] && left[i + 1].size() > 0))
+						alloff = false;
+					if (trafficFlownow[i] != 0)
+						nonetraffic = false;
+				}
+				
+				// checking priority of flushing left or right
+				totLeft = sumLeft(movingCars, left);
+				totRight = sumRight(movingCars, right);
+				
+				if (totLeft > totRight)
+					goLeft = true;
+				else
+					goLeft = false;
+				// boolean sameway = sameWay(movingCars);
+				/*
+				 * if (sameway) { int[] carOnRoad = trafficFlow(movingCars); boolean
+				 * dirright = false; boolean dirleft = false; for (int value:
+				 * carOnRoad){ if(value > 0) dirright = true; if (value <0) dirleft
+				 * = true; }
+				 * //System.out.println("++++++++++We are the same direction*********"
+				 * ); if (dirright || dirleft){ for (int i = 0; i != nsegments; ++i)
+				 * { llights[i] = false; rlights[i] = false; }} //rlights[0]=false;
+				 * //llights[nsegments]=false;
+				 * 
+				 * totLeft = sumLeft(movingCars, left); totRight =
+				 * sumRight(movingCars, right);
+				 * 
+				 * 
+				 * if (dirright){ if (totRight !=0) flushright(rlights); else
+				 * if(totLeft !=0) flushleft(llights); if (totLeft==0 && totRight
+				 * ==0) this.state= States.NORMAL; } if (dirleft){ if (totLeft !=0)
+				 * flushleft(llights); else if(totRight !=0) flushright(rlights); if
+				 * (totLeft==0 && totRight ==0) this.state= States.NORMAL; } }
+				 */
+				// check if flush condition is met
+				if (alloff && nonetraffic) {
+					for (int i = 0; i != nsegments; i++) {
+						if (left[i + 1].size() > 0) {
+							this.state = States.FLUSH;
+							llights[i] = true;
+							for (int j = i; j != nsegments; j++) {
+								llights[j] = true;
+							}
+							return;
 						}
-						return;
+					}
+					for (int i = nsegments; i != 1; i--) {
+						if (right[i - 1].size() > 0) {
+							rlights[i] = true;
+							for (int j = i; j != nsegments; j++) {
+								rlights[j] = true;
+							}
+							return;
+						}
 					}
 				}
-				for (int i = nsegments; i != 1; i--) {
-					if (right[i - 1].size() > 0) {
-						rlights[i] = true;
-						for (int j = i; j != nsegments; j++) {
-							rlights[j] = true;
-						}
-						return;
-					}
+				
+			}
+				break;
+				
+			case FLUSH: {
+				System.out.println("******flush state*******");
+				
+				for (int i = 0; i != nsegments; ++i) {
+					llights[i] = false;
+					rlights[i] = false;
 				}
+				// rlights[0]=false;
+				// llights[nsegments]=false;
+				
+				totLeft = sumLeft(movingCars, left);
+				totRight = sumRight(movingCars, right);
+				
+				if (goLeft) {
+					if (totLeft != 0)
+						flushleft(llights, rlights, left, right, movingCars);
+					else if (totRight != 0)
+						flushright(llights, rlights, left, right, movingCars);
+					if (totLeft == 0 && totRight == 0)
+						this.state = States.NORMAL;
+					
+				} else {
+					if (totRight != 0)
+						flushright(llights, rlights, left, right, movingCars);
+					else if (totLeft != 0)
+						flushleft(llights, rlights, left, right, movingCars);
+					if (totLeft == 0 && totRight == 0)
+						this.state = States.NORMAL;
+				}
+				
 			}
-
-		}
-			break;
-
-		case FLUSH: {
-			System.out.println("******flush state*******");
-
-			for (int i = 0; i != nsegments; ++i) {
-				llights[i] = false;
-				rlights[i] = false;
-			}
-			// rlights[0]=false;
-			// llights[nsegments]=false;
-
-			totLeft = sumLeft(movingCars, left);
-			totRight = sumRight(movingCars, right);
-
-			if (goLeft) {
-				if (totLeft != 0)
-					flushleft(llights, rlights, left, right, movingCars);
-				else if (totRight != 0)
-					flushright(llights, rlights, left, right, movingCars);
-				if (totLeft == 0 && totRight == 0)
-					this.state = States.NORMAL;
-
-			} else {
-				if (totRight != 0)
-					flushright(llights, rlights, left, right, movingCars);
-				else if (totLeft != 0)
-					flushleft(llights, rlights, left, right, movingCars);
-				if (totLeft == 0 && totRight == 0)
-					this.state = States.NORMAL;
-			}
-
-		}
 		}
 	}
-
+	
+	public int enableFlush(){
+		
+		return 0;
+	}
+	
 	// check if the segment has traffic
 	private boolean hasTraffic(MovingCar[] cars, int seg, int dir) {
 		for (MovingCar car : cars) {
@@ -297,38 +328,38 @@ public class Player extends oneway.sim.Player {
 		}
 		return false;
 	}
-
+	
 	private void flushleft(boolean[] llights, boolean[] rlights,
-			Parking[] left, Parking[] right, MovingCar[] car) {
+						   Parking[] left, Parking[] right, MovingCar[] car) {
 		System.out.println("the left flush");
 		for (int i = 0; i != nsegments; ++i) {
 			llights[i] = true;
 			rlights[i] = false;
 		}
 		int[] trafficFlownow = new int[nsegments];
-
+		
 		trafficFlownow = trafficFlow(car);
 		if (left[nsegments - 1].size() == 0
-				&& trafficFlownow[nsegments - 1] >= 0) {
+			&& trafficFlownow[nsegments - 1] >= 0) {
 			rlights[nsegments - 1] = true;
 			System.out.println("set the last light to green\n");
 		}
 		if (nsegments - 2 > 0) {
 			for (int j = nsegments - 2; j != 0; j--) {
 				if (left[j].size() == 0) {
-
+					
 					if (trafficFlownow[j + 1] >= 0) {
 						if (j + 2 < nsegments) {
 							if (rlights[j + 2] == true) {
 								System.out
-										.printf("there is no car going left, so enable the right one %d \n",
-												j);
+								.printf("there is no car going left, so enable the right one %d \n",
+										j);
 								rlights[j + 1] = true;
 							}
 						} else {
 							System.out
-									.printf("there is no car going left, so enable the right one %d \n",
-											j);
+							.printf("there is no car going left, so enable the right one %d \n",
+									j);
 							rlights[j + 1] = true;
 						}
 					}
@@ -338,26 +369,26 @@ public class Player extends oneway.sim.Player {
 		}
 		llights[nsegments - 1] = false;
 	}
-
+	
 	private void flushright(boolean[] llights, boolean[] rlights,
-			Parking[] left, Parking[] right, MovingCar[] car) {
+							Parking[] left, Parking[] right, MovingCar[] car) {
 		System.out.println("the right flush\n");
 		for (int i = 0; i != nsegments; ++i) {
 			llights[i] = false;
 			rlights[i] = true;
 		}
 		int[] trafficFlownow = new int[nsegments];
-
+		
 		trafficFlownow = trafficFlow(car);
 		if (right[0].size() == 0
-				&& trafficFlownow[0] <= 0) {
+			&& trafficFlownow[0] <= 0) {
 			llights[0] = true;
 			//System.out.println("set the last light to green\n");
 		}
 		if (nsegments > 1) {
 			for (int j = 1; j != nsegments; j++) {
 				if (right[j].size() == 0) {
-
+					
 					if (trafficFlownow[j -1] <= 0) {
 						if (nsegments>1) {
 							if (llights[j -1 ] == true) {
@@ -366,7 +397,7 @@ public class Player extends oneway.sim.Player {
 							}
 						} else {
 							System.out
-									.printf("there is no car going left, so enable the right one %d \n",j);
+							.printf("there is no car going left, so enable the right one %d \n",j);
 							llights[j] = true;
 						}
 					}
@@ -377,38 +408,38 @@ public class Player extends oneway.sim.Player {
 		llights[nsegments-1] = false;
 		rlights[0] = false;
 	}
-//	private void flushright(boolean[] llights, boolean[] rlights,
-//			Parking[] left, Parking[] right, MovingCar[] car) {
-//		for (int i = 0; i != nsegments; ++i) {
-//			llights[i] = false;
-//			rlights[i] = true;
-//		}
-//		int[] trafficFlownow = new int[nsegments];
-//
-//		trafficFlownow = trafficFlow(car);
-//		if (right[0].size() == 0 && trafficFlownow[0] <= 0)
-//			llights[0] = true;
-//		for (int j = 1; j != nsegments; j++) {
-//			if (right[j].size() == 0 &&trafficFlownow[j - 1] <= 0) {
-//				if (llights[j - 1] && trafficFlownow[j - 1] == 0) {
-//					llights[j] = true;
-//					System.out
-//							.printf("there is no car going right, so enable the left one %d \n",
-//									j);
-//				}
-//			} else
-//				rlights[j] = true;
-//		}
-//		rlights[0] = false;
-//	}
-
+	//	private void flushright(boolean[] llights, boolean[] rlights,
+	//			Parking[] left, Parking[] right, MovingCar[] car) {
+	//		for (int i = 0; i != nsegments; ++i) {
+	//			llights[i] = false;
+	//			rlights[i] = true;
+	//		}
+	//		int[] trafficFlownow = new int[nsegments];
+	//
+	//		trafficFlownow = trafficFlow(car);
+	//		if (right[0].size() == 0 && trafficFlownow[0] <= 0)
+	//			llights[0] = true;
+	//		for (int j = 1; j != nsegments; j++) {
+	//			if (right[j].size() == 0 &&trafficFlownow[j - 1] <= 0) {
+	//				if (llights[j - 1] && trafficFlownow[j - 1] == 0) {
+	//					llights[j] = true;
+	//					System.out
+	//							.printf("there is no car going right, so enable the left one %d \n",
+	//									j);
+	//				}
+	//			} else
+	//				rlights[j] = true;
+	//		}
+	//		rlights[0] = false;
+	//	}
+	
 	private int[] trafficFlow(MovingCar[] cars) {
 		int[] segmentFlow = new int[nsegments];
-
+		
 		for (int i = 0; i < segmentFlow.length; i++) {
 			segmentFlow[i] = 0;
 		}
-
+		
 		for (MovingCar car : cars) {
 			if (segmentFlow[car.segment] == 0) {
 				segmentFlow[car.segment]++;
@@ -421,12 +452,12 @@ public class Player extends oneway.sim.Player {
 				}
 			}
 		}
-
+		
 		// System.out.println(Arrays.toString(segmentFlow));
 		// System.out.println("************");
 		return segmentFlow;
 	}
-
+	
 	private int[] lesstraffic(int[] trafficflow, Parking[] left, Parking[] right) {
 		int[] lesstraffic = new int[nsegments];
 		int lefttraffic;
@@ -447,9 +478,9 @@ public class Player extends oneway.sim.Player {
 				lesstraffic[i] = righttraffic;
 		}
 		return lesstraffic;
-
+		
 	}
-
+	
 	public int sumLeft(MovingCar[] cars, Parking[] left) {
 		int[] carOnRoad = trafficFlow(cars);
 		int totalLeft = 0;
@@ -465,7 +496,7 @@ public class Player extends oneway.sim.Player {
 		}
 		return (totalLeft + left[left.length - 1].size()) * -1;
 	}
-
+	
 	public boolean sameWay(MovingCar[] cars) {
 		int[] carOnRoad = trafficFlow(cars);
 		boolean right = false;
@@ -475,14 +506,14 @@ public class Player extends oneway.sim.Player {
 				right = true;
 			if (value < 0)
 				left = true;
-
+			
 		}
 		if (left && right)
 			return false;
 		else
 			return true;
 	}
-
+	
 	public int sumRight(MovingCar[] cars, Parking[] right) {
 		int[] carOnRoad = trafficFlow(cars);
 		int totalRight = 0;
@@ -498,8 +529,8 @@ public class Player extends oneway.sim.Player {
 		}
 		return totalRight - right[0].size();
 	}
-
-public int cleartime(int segment, MovingCar[] cars) {
+	
+	public int cleartime(int segment, MovingCar[] cars) {
 		int farthestBlock = 0;
 		int segmentLength = nblocks[segment];
 		for (MovingCar car : cars) {
@@ -508,14 +539,14 @@ public int cleartime(int segment, MovingCar[] cars) {
 				if(car.dir > 0){
 					position = segmentLength - position;
 				}
-					if (position > farthestBlock) {
-						farthestBlock = car.block;
-					}
+				if (position > farthestBlock) {
+					farthestBlock = car.block;
+				}
 			}
 		}
 		return farthestBlock;
 	}
-
+	
 	private int nsegments;
 	private int[] nblocks;
 	private int[] capacity;
