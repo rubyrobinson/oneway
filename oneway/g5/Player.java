@@ -34,12 +34,13 @@ public class Player extends oneway.sim.Player {
 						  Parking[] right, boolean[] llights, boolean[] rlights) {
 		/*
 		 for (MovingCar car : movingCars) {
-		 if (!(car.equals(null))) {
-		 System.out.println(car.block);
-		 System.out.println(car.segment);
-		 }
+			 if (!(car.equals(null))) {
+				 System.out.println(car.block);
+			 System.out.println(car.segment);
+			 }
 		 }
 		 */
+		
 		// variables
 		boolean goLeft = true;
 		int totLeft = 0;
@@ -47,8 +48,7 @@ public class Player extends oneway.sim.Player {
 		
 		switch (this.state) {
 				
-				
-				//set all lights to green -> turn off lights if in danger -> flush if deadlock
+			//set all lights to green -> turn off lights if in danger -> flush if deadlock
 			case NORMAL: {
 				//set all lights to green
 				for (int i = 0; i != nsegments; ++i) {
@@ -59,6 +59,10 @@ public class Player extends oneway.sim.Player {
 				boolean[] indanger = new boolean[nsegments + 1];
 				int[] trafficFlownow = new int[nsegments];
 				trafficFlownow = trafficFlow(movingCars);
+			
+				//used to compare which side to favor traffic
+				totLeft = sumLeft(movingCars, left);
+				totRight = sumRight(movingCars, right);
 				
 				// checks for crash prevention between 3 segments
 				for(int i = 0; i < nsegments -2; i++){
@@ -68,7 +72,10 @@ public class Player extends oneway.sim.Player {
 								for(MovingCar car2 : movingCars){
 									if(car2.segment == i+2 && car2.dir < 0){
 										if((nblocks[i]-car1.block+1) == car2.block){
-											rlights[i+1] = false;
+											if(totLeft > totRight)
+												rlights[i+1] = false;
+											else
+												llights[i+1] = false;
 										}
 									}	
 								}
@@ -82,8 +89,12 @@ public class Player extends oneway.sim.Player {
 				for(int i = 0; i < nsegments - 2; i++){
 					if(llights[i] && left[i+1].size() > 0){
 						for(MovingCar car : movingCars){
-							if(car.segment == i && car.dir > 0 && (nblocks[i] - car.block) == 0 && rlights[i])
-								llights[i] = false;
+							if(car.segment == i && car.dir > 0 && (nblocks[i] - car.block) == 0 && rlights[i]){
+								if(totLeft > totRight)
+									rlights[i] = false;
+								else
+									llights[i] = false;
+							}
 						}
 					}
 				}
@@ -91,8 +102,12 @@ public class Player extends oneway.sim.Player {
 				for(int i = 0; i < nsegments - 1; i++){
 					if(rlights[i] && right[i].size() > 0){
 						for(MovingCar car : movingCars){
-							if(car.segment == i+1 && car.dir < 0 && car.block == 0 && llights[i])
-								rlights[i] = false;
+							if(car.segment == i+1 && car.dir < 0 && car.block == 0 && llights[i]){
+								if(totLeft > totRight)
+									rlights[i] = false;
+								else
+									llights[i] = false;
+							}
 						}
 					}
 				}
@@ -100,11 +115,19 @@ public class Player extends oneway.sim.Player {
 				// checks for edge cases of the 3 segment crash prevention
 				for(MovingCar car : movingCars){
 					if(car.segment == (nsegments-2) && car.dir > 0 && (nblocks[nsegments-2] - car.block) == 1
-					   && rlights[nsegments-1])
-						llights[nsegments-1] = false;
+					   && rlights[nsegments-1]){
+						if(totLeft > totRight)
+							rlights[nsegments-1] = false;
+						else
+							llights[nsegments-1] = false;
+					}
 					if(car.segment == 1 && car.dir < 0 && car.block == 0
-					   && llights[0])
-						rlights[0] = false;
+					   && llights[0]){
+						if(totLeft > totRight)
+							rlights[0] = false;
+						else
+							llights[0] = false;
+					}
 				}
 				
 				// find out almost full parking lots
