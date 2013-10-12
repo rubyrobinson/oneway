@@ -77,6 +77,26 @@ public class Player extends oneway.sim.Player {
 				}
 			}
 
+			// checks for crash prevention between 2 segments and a parking lot
+			// case: ]--- --- 01>[i]--- --- ---[<1]
+			for(int i = 0; i < nsegments - 2; i++){
+				if(llights[i] && left[i+1].size() > 0){
+					for(MovingCar car : movingCars){
+						if(car.segment == i && car.dir > 0 && (nblocks[i] - car.block) == 0 && rlights[i])
+							llights[i] = false;
+					}
+				}
+			}
+			// case: [1>]--- --- ---[i]<01--- ---
+			for(int i = 0; i < nsegments - 1; i++){
+				if(rlights[i] && right[i].size() > 0){
+					for(MovingCar car : movingCars){
+						if(car.segment == i+1 && car.dir < 0 && car.block == 0 && llights[i])
+							rlights[i] = false;
+					}
+				}
+			}
+
 			// checks for edge cases of the 3 segment crash prevention
 			for(MovingCar car : movingCars){
 				if(car.segment == (nsegments-2) && car.dir > 0 && (nblocks[nsegments-2] - car.block) == 1
