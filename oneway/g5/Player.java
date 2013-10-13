@@ -298,14 +298,14 @@ public class Player extends oneway.sim.Player {
 		
 		// checks for edge cases of the 3 segment crash prevention
 		for(MovingCar car : movingCars){
-			if(car.segment == (nsegments-2) && car.dir > 0 && (nblocks[nsegments-2] - car.block -1) == 1
+			if(car.segment == (nsegments-2) && car.dir > 0 && (nblocks[nsegments-2] - car.block) == 1
 			   && rlights[nsegments-1]){
 				if(totLeft > totRight)
 					rlights[nsegments-1] = false;
 				else
 					llights[nsegments-1] = false;
 			}
-			if(car.segment == 1 && car.dir < 0 && car.block == 1
+			if(car.segment == 1 && car.dir < 0 && car.block == 0
 			   && llights[0]){
 				if(totLeft > totRight)
 					rlights[0] = false;
