@@ -63,7 +63,7 @@ public class Player extends oneway.sim.Player {
 				if (trafficFlownow[i] < 0)
 					goingleft = -trafficFlownow[i];
 
-				if (left[i].size() + right[i].size() + goingright + goingleft > (capacity[i]) - 4
+				if (left[i].size() + right[i].size() + goingright + goingleft > (capacity[i]) - 2
 
 				) {
 					// System.out.printf("we are in danger!!\n");
@@ -93,7 +93,7 @@ public class Player extends oneway.sim.Player {
 			}
 
 			int counter = 0;
-			while (counter++ != nsegments) {
+			while (counter != nsegments) {
 				LinkedList<Integer> m = new LinkedList<Integer>();
 				m = chainOfDanger(indanger, counter);
 				System.out.println(m);
@@ -106,40 +106,40 @@ public class Player extends oneway.sim.Player {
 						int righttime = cleartime(counter, movingCars);
 						System.out.printf("%d the right time is \n", righttime);
 						if (lefttime > righttime) {
-							if (!indanger[counter + 1]) {
-								llights[counter] = false;
-								if (!rlights[counter])
-									rlights[counter - 1] = false;
+							if (!indanger[m.get(0) + 1]) {
+								llights[m.get(0)] = false;
+								if (!rlights[m.get(0)])
+									rlights[m.get(0) - 1] = false;
 								System.out
 										.printf("shut off the left light %d\n",
-												counter);
+												m.get(0));
 							} else {
-								llights[counter] = false;
-								rlights[counter - 1] = true;
+								llights[m.get(0)] = false;
+								rlights[m.get(0)-1] = true;
 								System.out
 										.printf("shut off the left light %d\n",
-												counter);
+												m.get(0));
 								System.out.printf(
 										"turn on the right light %d\n",
-										counter - 1);
+										m.get(0) - 1);
 							}
 						} else {
-							if (!indanger[counter - 1]) {
-								rlights[counter - 1] = false;
-								if (!llights[counter - 1])
-									llights[counter] = false;
+							if (!indanger[m.get(0) - 1]) {
+								rlights[m.get(0) - 1] = false;
+								if (!llights[m.get(0) - 1])
+									llights[m.get(0)] = false;
 								System.out.printf(
 										"shut off the right light %d\n",
-										counter);
+										m.get(0));
 							} else {
-								llights[counter] = true;
-								rlights[counter - 1] = false;
+								llights[m.get(0)] = true;
+								rlights[m.get(0) - 1] = false;
 								System.out
 										.printf("shut off the left light %d\n",
-												counter);
+												m.get(0));
 								System.out.printf(
 										"turn on the right light %d\n",
-										counter - 1);
+										m.get(0) - 1);
 							}
 						}
 					}
@@ -148,8 +148,10 @@ public class Player extends oneway.sim.Player {
 				if (m.size() > 1) {
 					allindanger(m.get(0), m.get(m.size() - 1), movingCars,
 							llights, rlights, left, right);
-					counter = counter + m.size();
+					counter = counter + m.size()-1;
+				
 				}
+				counter++;
 			} // end of while loop
 
 			// last resort safetyCheck
