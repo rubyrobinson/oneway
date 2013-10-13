@@ -68,7 +68,7 @@ public class Player extends oneway.sim.Player {
 						goingleft = -trafficFlownow[i];
 					
 					if (left[i].size() + right[i].size()
-						+ goingright+ goingleft > (capacity[i]) - 2) {
+						+ goingright+ goingleft > (capacity[i]) - 4) {
 						// System.out.printf("we are in danger!!\n");
 						indanger[i] = true;
 						
@@ -237,7 +237,7 @@ public class Player extends oneway.sim.Player {
 	
 	public void safetyCheck(MovingCar[] movingCars, Parking[] left,
 						  Parking[] right, boolean[] llights, boolean[] rlights) {
-		
+	
 		//used to compare which side to favor traffic
 		int totLeft = sumLeft(movingCars, left);
 		int totRight = sumRight(movingCars, right);
@@ -252,7 +252,6 @@ public class Player extends oneway.sim.Player {
 								if((nblocks[i]-car1.block+1) == car2.block){
 									if(totLeft > totRight){
 										rlights[i+1] = false;
-										System.out.printf("\nit is here we shut off the right light %d\n", i);
 									}else
 										llights[i+1] = false;
 								}
@@ -266,7 +265,7 @@ public class Player extends oneway.sim.Player {
 		// checks for crash prevention between 2 segments and a parking lot
 		// case: ]--- --- 01>[i]--- --- ---[<1]
 		for(int i = 0; i < nsegments - 2; i++){
-			if(left[i+1].size() > 0){
+			if(/*llights[i] &&*/ left[i+1].size() > 0){
 				for(MovingCar car : movingCars){
 					if(car.segment == i && car.dir > 0 && (nblocks[i] - car.block - 1) == 1){
 						if(totLeft > totRight){
@@ -281,11 +280,11 @@ public class Player extends oneway.sim.Player {
 				}
 			}
 		}
-		// case: [1>]--- --- ---[i]<01--- ---
+		// case: [1>]--- --- ---[ ]<01--- ---
 		for(int i = 1; i < nsegments - 1; i++){
-			if(right[i].size() > 0){
+			if(/*rlights[i] &&*/ right[i].size() > 0){
 				for(MovingCar car : movingCars){
-					if(car.segment == i+1 && car.dir < 0 && car.block == 1){
+					if(car.segment == i+1 && car.dir < 0 && car.block == 0){
 						if(totLeft > totRight){
 							rlights[i] = false;
 							System.out.println("Stanley is shutting off rlights["+i+"]!");
@@ -531,7 +530,6 @@ public class Player extends oneway.sim.Player {
 		return farthestBlock;
 	}
 
-	
 	public void allindanger(int i, int j, MovingCar[] movingCars,
 			boolean[] llights, boolean[] rlights) {
 		System.out.println("\n all in danger!!!!!\n");
