@@ -531,7 +531,38 @@ public class Player extends oneway.sim.Player {
 		return farthestBlock;
 	}
 
-	public void allindanger(int i, int j, MovingCar[] movingCars, boolean[] llights, boolean[] rlights) {
+	
+	public void allindanger(int i, int j, MovingCar[] movingCars,
+			boolean[] llights, boolean[] rlights) {
+		System.out.println("\n all in danger!!!!!\n");
+		for (int k = i; k <= j; k++) {
+			// if (indanger[i]) {
+			System.out.printf("%d is in danger\n", k);
+		}
+		int lefttime = cleartime(i - 1, movingCars);
+		System.out.printf("%d the left time is\n ", lefttime);
+		int righttime = cleartime(j, movingCars);
+		System.out.printf("%d the right time is \n", righttime);
+		if (lefttime > righttime) {
+			for (int k = i; k <= j; k++) {
+				llights[j] = false;
+				if (!rlights[k]) {
+					rlights[k - 1] = false;
+					System.out.printf("shut off the left light %d\n", i);
+				}
+			}
+		} else {
+			// rlights[i-1] = false;
+			// llights[j] = false;
+			for (int k = i; k <= j; k++) {
+				rlights[i - 1] = false;
+				if (!llights[j - 1])
+					llights[j] = false;
+				System.out.printf("shut off the right light %d\n", i);
+			}
+		}
+	}
+	/*public void allindanger(int i, int j, MovingCar[] movingCars, boolean[] llights, boolean[] rlights) {
 		System.out.println("\n all in danger!!!!!\n");
 
 		for (int k = i; k <= j; k++) {
@@ -561,7 +592,7 @@ System.out.printf("the right time is %d\n", righttime);
 System.out.printf("shut off the right light %d\n", i);
 			} 
 		}
-	}
+	}*/
 		
 	//each index refers to the parking lot index
 	//each index contains LinkedList of lots that are adjacent and in danger to it
@@ -575,15 +606,18 @@ System.out.printf("shut off the right light %d\n", i);
 		boolean notInDanger = false;
 		
 		for(int i=1; index + i< nsegments  && !notInDanger; i++){
+//			System.out.printf("INDEX NUMBER %d",i );
 			notInDanger = true;
 			if(index+i<nsegments){
 				if(indanger[index+i]){
+//					System.out.println("IM IN HERE!!!!!");
+//					System.out.printf("this is the added index %d", i+1);
 					adjacentDangers.add(index+i);
+					notInDanger = false;
 				}
-				notInDanger = false;
 			}
 		}
-		
+//		System.out.println("FINAL LINKEDLIST" + adjacentDangers);
 		return adjacentDangers;
 	}
 	
