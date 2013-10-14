@@ -341,7 +341,10 @@ public class Player extends oneway.sim.Player {
 		if (left[nsegments - 1].size() == 0	&& trafficFlownow[nsegments - 1] >= 0) {
 			rlights[nsegments - 1] = true;
 		}
-		
+	
+		//in flush case, no traffic and edge lights are off
+		//so we turn on right most rlights and check to see when we
+		//can open more rlights traversing from the right	
 		if (nsegments - 2 > 0) {
 			rlights[nsegments-2] = true;
 			for (int j = nsegments - 3; j > 0; j--) {
@@ -361,28 +364,6 @@ public class Player extends oneway.sim.Player {
 		//make sure no sneaky cars pop up from left
 		rlights[0] = false;
 
-
-/*
-					if (trafficFlownow[j + 1] >= 0) {
-						if (j + 2 < nsegments) {
-							if (rlights[j + 2] == true) {
-								System.out
-										.printf("there is no car going left, so enable the right one %d \n",
-												j);
-								rlights[j + 1] = true;
-							}
-						} else {
-							System.out
-									.printf("there is no car going left, so enable the right one %d \n",
-											j);
-							rlights[j + 1] = true;
-						}
-					}
-				} else
-					llights[j] = true;
-			}
-		}
-*/
 	}
 
 	private void flushright(boolean[] llights, boolean[] rlights,
@@ -404,6 +385,8 @@ public class Player extends oneway.sim.Player {
 			// System.out.println("set the last light to green\n");
 		}
 		
+		//we turn on left most llights and check to see when we
+		//can open more llights traversing from the left
 		if (nsegments > 1) {
 			llights[0] = true;
 			for (int j = 2; j < nsegments; j++) {
@@ -424,26 +407,6 @@ public class Player extends oneway.sim.Player {
 		//makes sure no sneaky cars will pop up
 		llights[nsegments - 1] = false;
 
-/*					if (trafficFlownow[j - 1] <= 0) {
-						if (nsegments > 1) {
-							if (llights[j - 1] == true) {
-								System.out
-										.printf("there is no car going right, so enable the left one %d \n",
-												j - 1);
-								llights[j] = true;
-							}
-						} else {
-							System.out
-									.printf("there is no car going left, so enable the right one %d \n",
-											j);
-							llights[j] = true;
-						}
-					}
-				} else
-					rlights[j] = true;
-			}
-		}
-*/
 	}
 
 	private int[] trafficFlow(MovingCar[] cars) {
@@ -466,8 +429,6 @@ public class Player extends oneway.sim.Player {
 			}
 		}
 
-		// System.out.println(Arrays.toString(segmentFlow));
-		// System.out.println("************");
 		return segmentFlow;
 	}
 
