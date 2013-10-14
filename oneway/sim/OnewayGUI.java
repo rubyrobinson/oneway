@@ -9,14 +9,24 @@ public class OnewayGUI extends Oneway
     static int BLOCK_WIDTH = 50;
     static int BLANK_WIDTH = 5;
 
+    private int refreshFreq = 500;
+
     // the html of current state
-    public String state() {
+    public String state(long refresh, int port) {
         String title = "Oneway";
         StringBuffer buf = new StringBuffer("");
 		buf.append("<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">\n");
 		buf.append("<html xmlns=\"http://www.w3.org/1999/xhtml\" dir=\"ltr\" lang=\"en-US\" xml:lang=\"en\">\n");
 		buf.append("<head>\n");
 		buf.append(" <meta http-equiv=\"Content-Type\" content=\"text/html; charset=iso-8859-7\" />\n");
+
+        if (refresh != 0) {
+            buf.append("<script type=\"text/javascript\">");
+            buf.append("var timer = null; function auto_reload() { window.location = 'http://localhost:" + port + "/step';}");            
+            buf.append("</script>");
+        }
+
+
 		buf.append(" <title>" + title + "</title>\n");
 		buf.append(" <style type=\"text/css\">\n");
 		buf.append("  a:link {text-decoration: none; color: blue;}\n");
@@ -50,7 +60,10 @@ public class OnewayGUI extends Oneway
 
 		buf.append(" </style>\n");
 		buf.append("</head>\n");
-		buf.append("<body>\n");
+        if (refresh == 0)
+            buf.append("<body>\n");
+        else
+            buf.append("<body onload=\"timer = setTimeout('auto_reload()'," + refreshFreq + ");\">\n");
 
 		// general part
         buf.append(" <div style=\"width:" + PIXELS + "px; margin-left:auto; margin-right: auto;\">\n");
@@ -212,21 +225,21 @@ public class OnewayGUI extends Oneway
 		for (File f : directoryFiles("oneway/sim/webpages", ".html"))
 			f.delete();
 		FileOutputStream out = new FileOutputStream("oneway/sim/webpages/index.html");
-		out.write(state().getBytes());
+		out.write(state(refresh, server.port()).getBytes());
 		out.close();
 
         // play the game
 		for (tick = 0; tick < MAX_TICKS; ++tick) {
 			boolean f = true;
 			if (server != null) do {
-				if (!f) refresh = 0;
-				server.replyState(state(), refresh);
-				while (((req = server.nextRequest(0)) == 'I') || req == 'X');
+                if (!f) refresh = 0;
+				server.replyState(state(refresh, server.port()), refresh);
+                while (((req = server.nextRequest(200)) == 'I') || req == 'X');
 				if (req == 'S') refresh = 0;
 				else if (req == 'P') refresh = 1;
 				f = false;
 			} while (req == 'B');
-			
+
             // Make a copy of current status
             Parking[] lcopy = copyList(left);
             Parking[] rcopy = copyList(right);
@@ -243,7 +256,7 @@ public class OnewayGUI extends Oneway
             printStep();
 
             out = new FileOutputStream("oneway/sim/webpages/" + tick + ".html");
-			out.write(state().getBytes());
+			out.write(state(refresh, server.port()).getBytes());
 			out.close();
 
             if (deliveredCars == cars.size())
@@ -257,14 +270,15 @@ public class OnewayGUI extends Oneway
 
         // clean up
 		if (server != null) {
-			server.replyState(state(), 0);
+			server.replyState(state(0, server.port()), 0);
 			while ((req = server.nextRequest(2000)) == 'I');
 		}
 		server.close();
     }
 
 
-    public OnewayGUI(Player player, String configFilePath, String timingFilePath) {
+    public OnewayGUI(Player player, String configFilePath, String timingFilePath, int refreshFreq) {
         super(player, configFilePath, timingFilePath);
+        this.refreshFreq = refreshFreq;
     }
 }

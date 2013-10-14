@@ -105,7 +105,7 @@ public class Player extends oneway.sim.Player {
 
 						if (lefttime > righttime) {
 							if (!indanger[index + 1]) {
-								llights[index] = false;
+								llights[index] = false;			System.out.printf("c llights[%d] = off\n", index);
 								if (!rlights[index]){
 									rlights[index - 1] = false; System.out.printf("c rlights[%d] = off\n", index - 1);
 								}
@@ -116,10 +116,11 @@ public class Player extends oneway.sim.Player {
 						} else {
 							if (!indanger[index - 1]) {
 								rlights[index - 1] = false; System.out.printf("d rlights[%d] = off\n", index - 1);
-								if (!llights[index - 1])
-									llights[index] = false;
+								if (!llights[index - 1]){
+									llights[index] = false; System.out.printf("d llights[%d] = off\n", index);
+								}
 							} else {
-								llights[index] = false; //true;
+								llights[index] = false /*true; */ System.out.printf("e llights[%d] = off\n", index);
 								rlights[index - 1] = true; //false; System.out.printf("e rlights[%d] = off\n", index - 1);
 							}
 						}
@@ -236,7 +237,7 @@ public class Player extends oneway.sim.Player {
 									if (totLeft > totRight) {
 										rlights[i + 1] = false; System.out.printf("f rlights[%d] = off\n", i+1);
 									} else {
-										llights[i + 1] = false;
+										llights[i + 1] = false; System.out.printf("f llights[%d] - off\n", i+1);
 									}
 								}
 							}
@@ -560,16 +561,17 @@ public class Player extends oneway.sim.Player {
 			if (hascar>0){
 			
 				for (int k = i; k <= j+1; k++) {
-					llights[j] = false;
+					llights[j] = false; System.out.printf("g llights[%d] = false\n", j);
 					rlights[k - 1] = true;
 					System.out.printf("\nsame traffic turn on rlights[%d]\n", k-1);
 				}
 			}
 			else {
 				for (int k = i; k <= j; k++) {
-					rlights[i - 1] = false; System.out.printf("g rlights[%d] = false\n", i - 1);
-					if (!llights[j - 1])
-						llights[j] = false;
+					rlights[i - 1] = false; System.out.printf("h rlights[%d] = false\n", i - 1);
+					if (!llights[j - 1]){
+						llights[j] = false; System.out.printf("h llights[%d] = false\n", j);
+					}
 					System.out.printf("shut off the rlights[%d]\n", i-1);
 				}
 			}

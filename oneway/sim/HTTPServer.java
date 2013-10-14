@@ -151,7 +151,7 @@ class HTTPServer {
 	{
 		OutputStream out = connection.getOutputStream();
 		String head = "HTTP/1.0 200 OK\r\n";
-		if (refresh > 0) head += "Refresh: " + refresh + "; url=http://localhost:" + port + "/step\r\n";
+        //        if (refresh > 0) head += "Refresh: " + refresh + "; url=http://localhost:" + port + "/step\r\n";
 		head += "Content-Length: " + content.length() + "\r\n\r\n";
 		out.write(head.getBytes());
 		out.write(content.getBytes());

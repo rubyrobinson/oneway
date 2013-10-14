@@ -129,6 +129,9 @@ public class Oneway
             current++;
         }
 
+        boolean []moveLaterRight = new boolean[rlights.length];
+        boolean []moveLaterLeft = new boolean[llights.length];
+
         // Category 1: Cars in the parking lot
         // TODO: does it cause crashing condition?
         // the distance to previous car, what if the car is in opposite direction?
@@ -144,16 +147,12 @@ public class Oneway
                     segments[i][0] = car;
                     newMovingCars.add(car);
                 }
-                else if (segments[i][0].dir > 0) {
-                    // it is a car we sent out before
-                    // we stal
+                else if (segments[i][0].dir < 0) {
+                    // mark and move later
+                    moveLaterRight[i] = true;
                 }
                 else {
-                    // there is car coming from the opposite direction
-                    // we crash
-                    errmsg = String.format("Car crashs at (%d, %d)\n", i, i);
-                    System.err.print(errmsg);
-                    return false;
+                    // stall
                 }
             }
         }
@@ -171,12 +170,12 @@ public class Oneway
                     segments[i][nblocks[i]-1] = car;
                     newMovingCars.add(car);
                 }
-                else if (segments[i][nblocks[i]-1].dir < 0) {
+                else if (segments[i][nblocks[i]-1].dir > 0) {
+                    // mark and move later
+                    moveLaterLeft[i] = true;
                 }
                 else {
-                    errmsg = String.format("Car crashs at (%d, %d)\n", i, nblocks[i]-1);
-                    System.err.print(errmsg);
-                    return false;
+                    // stall
                 }
             }
         }
@@ -303,6 +302,24 @@ public class Oneway
             }
         }
 
+        // Finally, move the delayed car from parking lot 
+        for (int i = 0; i != rlights.length; ++i) {
+            if (moveLaterRight[i]) {
+                int start = right[i].removeFirst();
+                MovingCar car = new MovingCar(i, 0, 1, start);
+                segments[i][0] = car;
+                newMovingCars.add(car);
+            }
+        }
+        
+        for (int i = 0; i != llights.length; ++i) {
+            if (moveLaterLeft[i]) {
+                int start = left[i+1].removeFirst();
+                MovingCar car = new MovingCar(i, nblocks[i]-1, -1, start);
+                segments[i][nblocks[i]-1] = car;
+                newMovingCars.add(car);
+            }
+        }
         // Update moving cars
         movingCars = newMovingCars;
         success = validateParking();
@@ -683,25 +700,21 @@ public class Oneway
         // gui
         if (args.length > 3)
             gui = Boolean.parseBoolean(args[3]);
-
-        // recompile
-        if (args.length > 4)
-            recompile = Boolean.parseBoolean(args[4]);
-
-        // verbose
-        if (args.length > 5)
-            verbose = Boolean.parseBoolean(args[5]);
         
         // trace
-        if (args.length > 6)
-            trace = Boolean.parseBoolean(args[6]);
+        if (args.length > 4)
+            trace = Boolean.parseBoolean(args[4]);
+
+        int refreshFreq = 500; // refresh every 500 milliseconds in UI 
+        if (args.length > 5)
+            refreshFreq = Integer.parseInt(args[5]);
 
         // load all the players
         Player player = loadPlayer(playerPath);
 
         Oneway game;
         if (gui)
-            game = new OnewayGUI(player, configPath, timingPath);
+            game = new OnewayGUI(player, configPath, timingPath, refreshFreq);
         else
             game = new Oneway(player, configPath, timingPath);
         game.play();
@@ -738,7 +751,7 @@ public class Oneway
     {
         System.err.println("##### Configuration #####");
         System.err.println("Number of segments: " + nsegments);
-        System.err.println("Number of blocks per segment: " + nblocks);
+        System.err.println("Number of blocks per segment: " + Arrays.toString(nblocks));
         System.err.print("Parking lot capacity: ");
         for (int i = 0; i <= nsegments; ++i) {
             if (i == 0 || i == nsegments)
