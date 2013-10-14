@@ -120,7 +120,7 @@ public class Player extends oneway.sim.Player {
 									llights[index] = false; System.out.printf("d llights[%d] = off\n", index);
 								}
 							} else {
-								llights[index] = false /*true; */ System.out.printf("e llights[%d] = off\n", index);
+								llights[index] = false; /*true; */ System.out.printf("e llights[%d] = off\n", index);
 								rlights[index - 1] = true; //false; System.out.printf("e rlights[%d] = off\n", index - 1);
 							}
 						}
@@ -226,6 +226,10 @@ public class Player extends oneway.sim.Player {
 		int totLeft = sumLeft(movingCars, left);
 		int totRight = sumRight(movingCars, right);
 
+		// used to check for car on segments
+		int[] trafficFlowNow = new int[nsegments];
+		trafficFlowNow = trafficFlow(movingCars);
+
 		// checks for crash prevention between 3 segments
 		for (int i = 0; i < nsegments - 2; i++) {
 			if (llights[i + 1] && rlights[i + 1]) {
@@ -311,6 +315,16 @@ public class Player extends oneway.sim.Player {
 				rlights[0] = false;
 			if (car.segment == nsegments - 1 && car.dir > 0)
 				llights[nsegments - 1] = false;
+		}
+
+		// makes sure we do not turn on lights when there is incoming traffic
+		for (int i=0; i<nsegments; i++){
+			if(trafficFlowNow[i] < 0){
+				rlights[i] = false;
+			}
+			if(trafficFlowNow[i] > 0){
+				llights[i] = false;
+			}
 		}
 
 	}
@@ -577,7 +591,6 @@ public class Player extends oneway.sim.Player {
 			}
 		}
 	}
-
 
 	// each index refers to the parking lot index
 	// each index contains LinkedList of lots that are adjacent and in danger to
