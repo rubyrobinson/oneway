@@ -76,7 +76,8 @@ public class Player extends oneway.sim.Player {
 				// and the next parking lot is not in danger
 				// if (right[i].size() > 0 && !hasTraffic(movingCars, i, -1)) {
 				if (hasTraffic(movingCars, i, -1)) {
-					rlights[i] = false; System.out.printf("a rlights[%d] = off\n", i);
+					rlights[i] = false;
+					System.out.printf("a rlights[%d] = off\n", i);
 				}
 
 				// if (left[i + 1].size() > 0 && !hasTraffic(movingCars, i, 1))
@@ -88,7 +89,8 @@ public class Player extends oneway.sim.Player {
 				// find which dir is in more danger
 				if (rlights[i] && llights[i] && right[i].size() > 0
 						&& left[i + 1].size() > 0) {
-					rlights[i] = false; System.out.printf("b rlights[%d] = off\n", i);
+					rlights[i] = false;
+					System.out.printf("b rlights[%d] = off\n", i);
 				}
 			}
 
@@ -98,36 +100,31 @@ public class Player extends oneway.sim.Player {
 				m = chainOfDanger(indanger, counter);
 				System.out.printf("what is the size of  m %d\n", m.size());
 				if (m.size() == 1) {
-					if (indanger[counter]) {
-						
-						int lefttime = cleartime(counter - 1, movingCars);
-						int righttime = cleartime(counter, movingCars);
-						int index = m.get(0);
-
-						if (lefttime > righttime) {
-							if (!indanger[index + 1]) {
-								llights[index] = false;			System.out.printf("c llights[%d] = off\n", index);
-								if (!rlights[index]){
-									rlights[index - 1] = false; System.out.printf("c rlights[%d] = off\n", index - 1);
-								}
-							} else {
-								llights[index] = true; //false;
-								rlights[index-1] = false; //true;
-							}
-						} else {
-							if (!indanger[index - 1]) {
-								rlights[index - 1] = false; System.out.printf("d rlights[%d] = off\n", index - 1);
-								if (!llights[index - 1]){
-									llights[index] = false; System.out.printf("d llights[%d] = off\n", index);
-								}
-							} else {
-								llights[index] = false; /*true; */ System.out.printf("e llights[%d] = off\n", index);
-								rlights[index - 1] = true; //false; System.out.printf("e rlights[%d] = off\n", index - 1);
+					System.out.printf("there is only one node in danger\n",
+							m.get(0));
+					int lefttime = cleartime(m.get(0) - 1, movingCars);
+					int righttime = cleartime(m.get(0), movingCars);
+					int index = m.get(0);
+					if (lefttime > righttime) {
+						if (!indanger[index + 1]) {
+							llights[index] = false;
+							System.out.printf("c llights[%d] = off\n", index);
+							if (!rlights[index]) {
+								rlights[index - 1] = false;
+								System.out.printf("c rlights[%d] = off\n",
+										index - 1);
 							}
 						}
+					} else {
+
+						rlights[index - 1] = false;
+						System.out.printf("d rlights[%d] = off\n", index - 1);
+
+						llights[index] = false;
+						System.out.printf("d llights[%d] = off\n", index);
 					}
 				}
-				
+
 				if (m.size() > 1) {
 					allindanger(m.get(0), m.get(m.size() - 1), movingCars,
 							llights, rlights, left, right);
@@ -137,7 +134,7 @@ public class Player extends oneway.sim.Player {
 				counter++;
 			} // end of while loop
 
-			//last resort safetyCheck
+			// last resort safetyCheck
 			safetyCheck(movingCars, left, right, llights, rlights);
 
 			// in case of no car is moving due to inDanger
@@ -241,9 +238,13 @@ public class Player extends oneway.sim.Player {
 							if (car2.segment == i + 2 && car2.dir < 0) {
 								if ((nblocks[i] - car1.block + 1) == car2.block) {
 									if (totLeft > totRight) {
-										rlights[i + 1] = false; System.out.printf("f rlights[%d] = off\n", i+1);
+										rlights[i + 1] = false;
+										System.out.printf(
+												"f rlights[%d] = off\n", i + 1);
 									} else {
-										llights[i + 1] = false; System.out.printf("f llights[%d] - off\n", i+1);
+										llights[i + 1] = false;
+										System.out.printf(
+												"f llights[%d] - off\n", i + 1);
 									}
 								}
 							}
@@ -259,14 +260,19 @@ public class Player extends oneway.sim.Player {
 				for (MovingCar car : movingCars) {
 					if (car.segment == i && car.dir > 0
 							&& (nblocks[i] - car.block - 1) == 1) {
-						if (capacity[i] == (right[i].size() + left[i-1].size()))
+						if (capacity[i] == (right[i].size() + left[i - 1]
+								.size()))
 							llights[i] = false;
 						else if (totLeft > totRight) {
-							System.out.println("Stanley is shutting off rlights["+ i + "]!");
+							System.out
+									.println("Stanley is shutting off rlights["
+											+ i + "]!");
 							rlights[i] = false;
 						} else {
 							llights[i] = false;
-							System.out.println("Stanley is shutting off llights["+ i + "]!");
+							System.out
+									.println("Stanley is shutting off llights["
+											+ i + "]!");
 						}
 					}
 				}
@@ -277,14 +283,19 @@ public class Player extends oneway.sim.Player {
 			if (rlights[i] && right[i].size() > 0) {
 				for (MovingCar car : movingCars) {
 					if (car.segment == i + 1 && car.dir < 0 && car.block == 0) {
-						if (capacity[i] == (right[i].size() + left[i-1].size()))
+						if (capacity[i] == (right[i].size() + left[i - 1]
+								.size()))
 							rlights[i] = false;
 						else if (totLeft > totRight) {
 							rlights[i] = false;
-							System.out.println("Stanley is shutting off rlights["+ i + "]!");
+							System.out
+									.println("Stanley is shutting off rlights["
+											+ i + "]!");
 						} else {
 							llights[i] = false;
-							System.out.println("Stanley is shutting off llights["+ i + "]!");
+							System.out
+									.println("Stanley is shutting off llights["
+											+ i + "]!");
 						}
 					}
 				}
@@ -320,17 +331,17 @@ public class Player extends oneway.sim.Player {
 		}
 
 		// makes sure we do not turn on lights when there is incoming traffic
-		for (int i=0; i<nsegments; i++){
-			if(trafficFlowNow[i] < 0){
+		for (int i = 0; i < nsegments; i++) {
+			if (trafficFlowNow[i] < 0) {
 				rlights[i] = false;
 			}
-			if(trafficFlowNow[i] > 0){
+			if (trafficFlowNow[i] > 0) {
 				llights[i] = false;
 			}
 		}
 
 	}
-	
+
 	// check if the segment has traffic
 	private boolean hasTraffic(MovingCar[] cars, int seg, int dir) {
 		for (MovingCar car : cars) {
@@ -342,83 +353,85 @@ public class Player extends oneway.sim.Player {
 
 	private void flushleft(boolean[] llights, boolean[] rlights,
 			Parking[] left, Parking[] right, MovingCar[] car) {
-		
+
 		System.out.println("the left flush");
-		
+
 		for (int i = 0; i != nsegments; ++i) {
 			llights[i] = true;
 			rlights[i] = false;
 		}
-		
+
 		int[] trafficFlownow = new int[nsegments];
 
 		trafficFlownow = trafficFlow(car);
-	
-		
-		if (left[nsegments - 1].size() == 0	&& trafficFlownow[nsegments - 1] >= 0) {
+
+		if (left[nsegments - 1].size() == 0
+				&& trafficFlownow[nsegments - 1] >= 0) {
 			rlights[nsegments - 1] = true;
 		}
-	
-		//in flush case, no traffic and edge lights are off
-		//so we turn on right most rlights and check to see when we
-		//can open more rlights traversing from the right	
+
+		// in flush case, no traffic and edge lights are off
+		// so we turn on right most rlights and check to see when we
+		// can open more rlights traversing from the right
 		if (nsegments - 1 > 0) {
 			for (int j = nsegments - 2; j > 0; j--) {
-				if (left[j+1].size() == 0 && rlights[j+1] && trafficFlownow[j] >=0) {
+				if (left[j + 1].size() == 0 && rlights[j + 1]
+						&& trafficFlownow[j] >= 0) {
 					rlights[j] = true;
 				}
 			}
 		}
 
-		//if no car is queued to go right
-		//might as well open up right parking lot
-		if(sumRight(car, right) == 0)
+		// if no car is queued to go right
+		// might as well open up right parking lot
+		if (sumRight(car, right) == 0)
 			llights[nsegments - 1] = true;
 		else
 			llights[nsegments - 1] = false;
-		//make sure no sneaky cars pop up from left
+		// make sure no sneaky cars pop up from left
 		rlights[0] = false;
 
 	}
 
 	private void flushright(boolean[] llights, boolean[] rlights,
 			Parking[] left, Parking[] right, MovingCar[] car) {
-		
+
 		System.out.println("the right flush\n");
-		
+
 		for (int i = 0; i != nsegments; ++i) {
 			llights[i] = false;
 			rlights[i] = true;
 		}
-		
+
 		int[] trafficFlownow = new int[nsegments];
 
 		trafficFlownow = trafficFlow(car);
-		
+
 		if (right[0].size() == 0 && trafficFlownow[0] <= 0) {
 			llights[0] = true;
 			// System.out.println("set the last light to green\n");
 		}
-		
-		//we turn on left most llights and check to see when we
-		//can open more llights traversing from the left
+
+		// we turn on left most llights and check to see when we
+		// can open more llights traversing from the left
 		if (nsegments > 0) {
 			for (int j = 1; j < nsegments; j++) {
-				if (right[j].size() == 0 && llights[j-1] && trafficFlownow[j] <=0 ) {
+				if (right[j].size() == 0 && llights[j - 1]
+						&& trafficFlownow[j] <= 0) {
 					llights[j] = true;
 				}
 			}
 		}
 
-		//finally check if anycar is queued to go left,
-		//if not, then might as well open up left parking lot
+		// finally check if anycar is queued to go left,
+		// if not, then might as well open up left parking lot
 
-		if(sumLeft(car, left) == 0)
+		if (sumLeft(car, left) == 0)
 			rlights[0] = true;
 		else
 			rlights[0] = false;
 
-		//makes sure no sneaky cars will pop up
+		// makes sure no sneaky cars will pop up
 		llights[nsegments - 1] = false;
 
 	}
@@ -534,58 +547,63 @@ public class Player extends oneway.sim.Player {
 		}
 		return farthestBlock;
 	}
+
 	public void allindanger(int i, int j, MovingCar[] movingCars,
-			boolean[] llights, boolean[] rlights, Parking[] left, Parking[] right) {
+			boolean[] llights, boolean[] rlights, Parking[] left,
+			Parking[] right) {
 		System.out.println("\n all in danger!!!!!\n");
-		rlights[i-1]= false;
-		llights[j]= false;
+		rlights[i - 1] = false;
+		llights[j] = false;
 		int[] trafficFlownow = new int[nsegments];
 		trafficFlownow = trafficFlow(movingCars);
 
 		for (int k = i; k <= j; k++) {
 			System.out.printf("%d is in danger\n", k);
-			if (left[k].size()+right[k].size() != capacity[k] || 
-					(left[k].size()+right[k].size() == capacity[k]) &&
-					((trafficFlownow[k-1]<=0))&&(trafficFlownow[k]>=0)){
-				
-				llights[k-1] = false;
+			if (left[k].size() + right[k].size() != capacity[k]
+					|| (left[k].size() + right[k].size() == capacity[k])
+					&& ((trafficFlownow[k - 1] <= 0))
+					&& (trafficFlownow[k] >= 0)) {
+
+				llights[k - 1] = false;
 				rlights[k] = false;
-			}
-			else{
+			} else {
 				System.out.printf("\nwe should not shut off %d\n", k);
 				rlights[k] = true;
 			}
 		}
-		
-		if (sameWay(movingCars)){
+
+		if (sameWay(movingCars)) {
 			System.out.printf("\n same way\n");
-			int hascar=0;
-			for (int k=0; k!=nsegments; k++){
-				if (trafficFlownow[k]>0){
-					hascar+=1;
+			int hascar = 0;
+			for (int k = 0; k != nsegments; k++) {
+				if (trafficFlownow[k] > 0) {
+					hascar += 1;
 					System.out.println("right");
 				}
-				if (trafficFlownow[k]<0){
-					hascar=-1;
+				if (trafficFlownow[k] < 0) {
+					hascar = -1;
 					System.out.println("left");
 				}
 			}
-			
-			if (hascar>0){
-			
-				for (int k = i; k <= j+1; k++) {
-					llights[j] = false; System.out.printf("g llights[%d] = false\n", j);
+
+			if (hascar > 0) {
+
+				for (int k = i; k <= j + 1; k++) {
+					llights[j] = false;
+					System.out.printf("g llights[%d] = false\n", j);
 					rlights[k - 1] = true;
-					System.out.printf("\nsame traffic turn on rlights[%d]\n", k-1);
+					System.out.printf("\nsame traffic turn on rlights[%d]\n",
+							k - 1);
 				}
-			}
-			else {
+			} else {
 				for (int k = i; k <= j; k++) {
-					rlights[i - 1] = false; System.out.printf("h rlights[%d] = false\n", i - 1);
-					if (!llights[j - 1]){
-						llights[j] = false; System.out.printf("h llights[%d] = false\n", j);
+					rlights[i - 1] = false;
+					System.out.printf("h rlights[%d] = false\n", i - 1);
+					if (!llights[j - 1]) {
+						llights[j] = false;
+						System.out.printf("h llights[%d] = false\n", j);
 					}
-					System.out.printf("shut off the rlights[%d]\n", i-1);
+					System.out.printf("shut off the rlights[%d]\n", i - 1);
 				}
 			}
 		}
@@ -596,7 +614,7 @@ public class Player extends oneway.sim.Player {
 	// it
 	private LinkedList<Integer> chainOfDanger(boolean[] indanger, int index) {
 		LinkedList<Integer> adjacentDangers = new LinkedList<Integer>();
-	
+
 		boolean notInDanger = false;
 
 		if (indanger[index]) {
