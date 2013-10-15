@@ -1,4 +1,4 @@
-package oneway.dumb;
+package oneway.g5;
 
 import oneway.sim.MovingCar;
 import oneway.sim.Parking;
@@ -362,10 +362,8 @@ public class Player extends oneway.sim.Player {
 		//in flush case, no traffic and edge lights are off
 		//so we turn on right most rlights and check to see when we
 		//can open more rlights traversing from the right	
-		if (nsegments - 2 > 0) {
-			rlights[nsegments-2] = true;
-			for (int j = nsegments - 3; j > 0; j--) {
-				System.out.println("current j is "+j);
+		if (nsegments - 1 > 0) {
+			for (int j = nsegments - 2; j > 0; j--) {
 				if (left[j+1].size() == 0 && rlights[j+1] && trafficFlownow[j] >=0) {
 					rlights[j] = true;
 				}
@@ -404,11 +402,10 @@ public class Player extends oneway.sim.Player {
 		
 		//we turn on left most llights and check to see when we
 		//can open more llights traversing from the left
-		if (nsegments > 1) {
-			llights[0] = true;
-			for (int j = 2; j < nsegments; j++) {
-				if (right[j].size() == 0 && llights[j-2] && trafficFlownow[j-1] <=0 ) {
-					llights[j-1] = true;
+		if (nsegments > 0) {
+			for (int j = 1; j < nsegments; j++) {
+				if (right[j].size() == 0 && llights[j-1] && trafficFlownow[j] <=0 ) {
+					llights[j] = true;
 				}
 			}
 		}
