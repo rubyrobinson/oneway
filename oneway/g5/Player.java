@@ -63,10 +63,10 @@ public class Player extends oneway.sim.Player {
 				if (trafficFlownow[i] < 0)
 					goingleft = -trafficFlownow[i];
 
-				if (left[i].size() + right[i].size() + goingright + goingleft >= (capacity[i]) - 2
-
-				) {
+				if (left[i].size() + right[i].size() + goingright + goingleft >= (capacity[i] - 2))
+				{
 					// System.out.printf("we are in danger!!\n");
+					System.out.println("OKAY IM SAYING THIS IS IN DANGER: " + i);
 					indanger[i] = true;
 				}
 			}
@@ -99,6 +99,8 @@ public class Player extends oneway.sim.Player {
 				LinkedList<Integer> m = new LinkedList<Integer>();
 				m = chainOfDanger(indanger, counter);
 				System.out.printf("what is the size of  m %d\n", m.size());
+				if (m.size()>0)
+					System.out.printf("the first one inside m is %d", m.get(0));
 				if (m.size() == 1) {
 					System.out.printf("there is only one node in danger\n",
 							m.get(0));
@@ -123,6 +125,7 @@ public class Player extends oneway.sim.Player {
 						llights[index] = false;
 						System.out.printf("d llights[%d] = off\n", index);
 					}
+				
 				}
 
 				if (m.size() > 1) {
@@ -161,7 +164,9 @@ public class Player extends oneway.sim.Player {
 				goLeft = false;
 
 			// check if flush condition is met
-			if (alloff && nonetraffic) {
+			//if (alloff && nonetraffic) {
+			if (nonetraffic){
+				System.out.println("we are in none traffic status");
 				for (int i = 0; i != nsegments; i++) {
 					if (left[i + 1].size() > 0) {
 						this.state = States.FLUSH;
@@ -174,6 +179,7 @@ public class Player extends oneway.sim.Player {
 				}
 				for (int i = nsegments; i != 1; i--) {
 					if (right[i - 1].size() > 0) {
+						this.state = States.FLUSH;
 						rlights[i] = true;
 						for (int j = i; j != nsegments; j++) {
 							rlights[j] = true;
@@ -181,6 +187,25 @@ public class Player extends oneway.sim.Player {
 						return;
 					}
 				}
+				if (this.state==state.NORMAL){
+					System.out.println("\n********in normal******\n");
+					this.state = States.FLUSH;
+					if (right[0].size()==0) {
+					llights[0] = true;
+					for (int j = 0; j != nsegments; j++) {
+						llights[j] = true;
+					}
+					return;
+					}
+					else{
+						rlights[0] = true;
+						for (int j = 0; j != nsegments; j++) {
+							rlights[j] = true;
+						}
+						return;
+					}
+				}
+				
 			}
 			// last resort safetyCheck
 			safetyCheck(movingCars, left, right, llights, rlights);
@@ -205,6 +230,7 @@ public class Player extends oneway.sim.Player {
 					flushright(llights, rlights, left, right, movingCars);
 				if (totLeft == 0 && totRight == 0)
 					this.state = States.NORMAL;
+				
 
 			} else {
 				if (totRight != 0)
@@ -213,7 +239,9 @@ public class Player extends oneway.sim.Player {
 					flushleft(llights, rlights, left, right, movingCars);
 				if (totLeft == 0 && totRight == 0)
 					this.state = States.NORMAL;
+				
 			}
+			
 		}
 		}
 	}
@@ -495,6 +523,7 @@ public class Player extends oneway.sim.Player {
 				totalLeft -= carsInLeft.size();
 			}
 		}
+		System.out.println((totalLeft + left[left.length - 1].size()) * -1);
 		return (totalLeft + left[left.length - 1].size()) * -1;
 	}
 
@@ -614,7 +643,7 @@ public class Player extends oneway.sim.Player {
 	// it
 	private LinkedList<Integer> chainOfDanger(boolean[] indanger, int index) {
 		LinkedList<Integer> adjacentDangers = new LinkedList<Integer>();
-
+		System.out.println("Hey I've got the index!!!!!" + index + "and is this in danger" + indanger[index]);
 		boolean notInDanger = false;
 
 		if (indanger[index]) {
@@ -623,6 +652,7 @@ public class Player extends oneway.sim.Player {
 
 		for (int i = 1; index + i < nsegments && !notInDanger; i++) {
 			notInDanger = true;
+			System.out.println("is the next one in danger: " + indanger[index + i]);
 			if (index + i < nsegments) {
 				if (indanger[index + i]) {
 					adjacentDangers.add(index + i);
