@@ -1,4 +1,4 @@
-package oneway.g5;
+package oneway.dumb;
 
 import oneway.sim.MovingCar;
 import oneway.sim.Parking;
@@ -63,7 +63,7 @@ public class Player extends oneway.sim.Player {
 				if (trafficFlownow[i] < 0)
 					goingleft = -trafficFlownow[i];
 
-				if (left[i].size() + right[i].size() + goingright + goingleft > (capacity[i]) - 2
+				if (left[i].size() + right[i].size() + goingright + goingleft >= (capacity[i]) - 2
 
 				) {
 					// System.out.printf("we are in danger!!\n");
@@ -96,6 +96,7 @@ public class Player extends oneway.sim.Player {
 			while (counter != nsegments) {
 				LinkedList<Integer> m = new LinkedList<Integer>();
 				m = chainOfDanger(indanger, counter);
+				System.out.printf("what is the size of  m %d\n", m.size());
 				if (m.size() == 1) {
 					if (indanger[counter]) {
 						
@@ -130,7 +131,8 @@ public class Player extends oneway.sim.Player {
 				if (m.size() > 1) {
 					allindanger(m.get(0), m.get(m.size() - 1), movingCars,
 							llights, rlights, left, right);
-					counter = counter + m.size()-1;
+					counter = counter + m.size();
+					System.out.printf("counter is %d", counter);
 				}
 				counter++;
 			} // end of while loop
