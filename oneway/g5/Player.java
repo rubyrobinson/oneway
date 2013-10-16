@@ -14,6 +14,7 @@ public class Player extends oneway.sim.Player {
 	
 	private static int tick = 0;
 	private States state;
+	private boolean flush = true;
 
 	public Player() {
 	}
@@ -39,6 +40,9 @@ public class Player extends oneway.sim.Player {
 
 		if(sumLeft(movingCars, left) + sumRight(movingCars, right) + left[nsegments].size() + right[0].size() != 0)
 			tick++;
+
+		if(flush)
+			this.state = States.FLUSH;
 
 		boolean goLeft = true;
 		int totLeft = 0;
@@ -229,8 +233,13 @@ public class Player extends oneway.sim.Player {
 				rlights[i] = false;
 			}
 
-			totLeft = sumLeft(movingCars, left);
-			totRight = sumRight(movingCars, right);
+			if(this.flush){
+				totLeft = sumLeft(movingCars, left) + left[nsegments].size();
+				totRight = sumRight(movingCars, right) + right[0].size();
+			}else{
+				totLeft = sumLeft(movingCars, left);
+				totRight = sumRight(movingCars, right);
+			}
 
 			if (goLeft) {
 				if (totLeft != 0)
@@ -239,8 +248,6 @@ public class Player extends oneway.sim.Player {
 					flushright(llights, rlights, left, right, movingCars);
 				if (totLeft == 0 && totRight == 0)
 					this.state = States.NORMAL;
-				
-
 			} else {
 				if (totRight != 0)
 					flushright(llights, rlights, left, right, movingCars);
@@ -428,6 +435,9 @@ public class Player extends oneway.sim.Player {
 		// make sure no sneaky cars pop up from left
 		rlights[0] = false;
 
+		//if flush test then enable llights[nsegments-1]
+		if(this.flush)
+			llights[nsegments-1] = true;
 	}
 
 	private void flushright(boolean[] llights, boolean[] rlights,
@@ -470,6 +480,10 @@ public class Player extends oneway.sim.Player {
 
 		// makes sure no sneaky cars will pop up
 		llights[nsegments - 1] = false;
+		
+		//if flush test
+		if(this.flush)
+			rlights[0] = true;
 
 	}
 
