@@ -100,30 +100,35 @@ public class Player extends oneway.sim.Player {
 				m = chainOfDanger(indanger, counter);
 				System.out.printf("what is the size of  m %d\n", m.size());
 				if (m.size()>0)
-					System.out.printf("the first one inside m is %d", m.get(0));
+					//System.out.printf("the first one inside m is %d", m.get(0));
 				if (m.size() == 1) {
-					System.out.printf("there is only one node in danger\n",
+					System.out.printf("\nthere is only one node in danger\n",
 							m.get(0));
 					int lefttime = cleartime(m.get(0) - 1, movingCars);
 					int righttime = cleartime(m.get(0), movingCars);
 					int index = m.get(0);
 					if (lefttime > righttime) {
-						if (!indanger[index + 1]) {
+						
 							llights[index] = false;
 							System.out.printf("c llights[%d] = off\n", index);
 							if (!rlights[index]) {
 								rlights[index - 1] = false;
 								System.out.printf("c rlights[%d] = off\n",
 										index - 1);
-							}
+							
 						}
 					} else {
 
 						rlights[index - 1] = false;
 						System.out.printf("d rlights[%d] = off\n", index - 1);
-
-						llights[index] = false;
-						System.out.printf("d llights[%d] = off\n", index);
+						if (!llights[index]) {
+							rlights[index - 1] = false;
+							System.out.printf("c rlights[%d] = off\n",
+									index - 1);
+							//System.out.printf("d llights[%d] = off\n", index);
+					}
+					//	llights[index] = false;
+						//System.out.printf("d llights[%d] = off\n", index);
 					}
 				
 				}
@@ -164,8 +169,8 @@ public class Player extends oneway.sim.Player {
 				goLeft = false;
 
 			// check if flush condition is met
-			//if (alloff && nonetraffic) {
-			if (nonetraffic){
+			if (alloff && nonetraffic) {
+			//if (nonetraffic){
 				System.out.println("we are in none traffic status");
 				for (int i = 0; i != nsegments; i++) {
 					if (left[i + 1].size() > 0) {
