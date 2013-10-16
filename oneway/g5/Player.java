@@ -14,7 +14,7 @@ public class Player extends oneway.sim.Player {
 	
 	private static int tick = 0;
 	private States state;
-	private boolean flush = true;
+	private boolean flush = false;
 
 	public Player() {
 	}
@@ -130,7 +130,7 @@ public class Player extends oneway.sim.Player {
 						rlights[index - 1] = false;
 						System.out.printf("d rlights[%d] = off\n", index - 1);
 						if (!llights[index-1]) {
-							rlights[index] = false;
+							llights[index] = false;
 							System.out.printf("d rlights[%d] = off\n",index);
 							//System.out.printf("d llights[%d] = off\n", index);
 					}
