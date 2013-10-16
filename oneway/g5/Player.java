@@ -14,7 +14,7 @@ public class Player extends oneway.sim.Player {
 	
 	private static int tick = 0;
 	private States state;
-	private boolean flush = false;
+	private boolean flush = true;
 
 	public Player() {
 	}
@@ -33,7 +33,26 @@ public class Player extends oneway.sim.Player {
 		 * System.out.println(car.block); System.out.println(car.segment); } }
 		 */
 		// variables
-		
+
+		//for long segments and big parking lot we use our normal case else we flush
+		int avgSeg=0;
+		int avgPark=0;
+
+		for(int i=0; i<nsegments; i++){
+			avgSeg += nblocks[i];
+		}
+			avgSeg /= nsegments;
+
+		for(int i=0; i<capacity.length; i++){
+			avgPark += capacity[i];
+		}
+			avgPark /= capacity.length;
+
+		if(avgSeg >= 40 && avgPark >= 15){
+			this.flush = false;
+		}
+
+		//force NORMAL for 2 ticks	
 		if(tick<3){
 			this.state = States.NORMAL;
 		}
