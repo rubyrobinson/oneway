@@ -65,8 +65,6 @@ public class Player extends oneway.sim.Player {
 
 				if (left[i].size() + right[i].size() + goingright + goingleft >= (capacity[i] - 2))
 				{
-					// System.out.printf("we are in danger!!\n");
-					System.out.println("OKAY IM SAYING THIS IS IN DANGER: " + i);
 					indanger[i] = true;
 				}
 			}
@@ -90,7 +88,7 @@ public class Player extends oneway.sim.Player {
 				if (rlights[i] && llights[i] && right[i].size() > 0
 						&& left[i + 1].size() > 0) {
 					rlights[i] = false;
-					System.out.printf("b rlights[%d] = off\n", i);
+					//System.out.printf("b rlights[%d] = off\n", i);
 				}
 			}
 
@@ -99,32 +97,30 @@ public class Player extends oneway.sim.Player {
 				LinkedList<Integer> m = new LinkedList<Integer>();
 				m = chainOfDanger(indanger, counter);
 				System.out.printf("what is the size of  m %d\n", m.size());
-				if (m.size()>0)
+				//if (m.size()>0)
 					//System.out.printf("the first one inside m is %d", m.get(0));
 				if (m.size() == 1) {
-					System.out.printf("\nthere is only one node in danger\n",
-							m.get(0));
+					//System.out.printf("\nthere is only one node in danger\n",
+							//m.get(0));
 					int lefttime = cleartime(m.get(0) - 1, movingCars);
 					int righttime = cleartime(m.get(0), movingCars);
 					int index = m.get(0);
 					if (lefttime > righttime) {
-						
 							llights[index] = false;
-							System.out.printf("c llights[%d] = off\n", index);
+							//System.out.printf("c llights[%d] = off\n", index);
 							if (!rlights[index]) {
 								rlights[index - 1] = false;
-								System.out.printf("c rlights[%d] = off\n",
-										index - 1);
+								//System.out.printf("c rlights[%d] = off\n",
+									//	index - 1);
 							
 						}
 					} else {
 
 						rlights[index - 1] = false;
 						System.out.printf("d rlights[%d] = off\n", index - 1);
-						if (!llights[index]) {
-							rlights[index - 1] = false;
-							System.out.printf("c rlights[%d] = off\n",
-									index - 1);
+						if (!llights[index-1]) {
+							rlights[index] = false;
+							//System.out.printf("c rlights[%d] = off\n",index - 1);
 							//System.out.printf("d llights[%d] = off\n", index);
 					}
 					//	llights[index] = false;
@@ -137,7 +133,7 @@ public class Player extends oneway.sim.Player {
 					allindanger(m.get(0), m.get(m.size() - 1), movingCars,
 							llights, rlights, left, right);
 					counter = counter + m.size();
-					System.out.printf("counter is %d", counter);
+					//System.out.printf("counter is %d", counter);
 				}
 				counter++;
 			} // end of while loop
