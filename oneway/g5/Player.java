@@ -11,7 +11,8 @@ public class Player extends oneway.sim.Player {
 	public enum States {
 		NORMAL, FLUSH
 	}
-
+	
+	private static int tick = 0;
 	private States state;
 
 	public Player() {
@@ -30,12 +31,19 @@ public class Player extends oneway.sim.Player {
 		 * for (MovingCar car : movingCars) { if (!(car.equals(null))) {
 		 * System.out.println(car.block); System.out.println(car.segment); } }
 		 */
-
 		// variables
+		
+		if(tick<3){
+			this.state = States.NORMAL;
+		}
+
+		if(sumLeft(movingCars, left) + sumRight(movingCars, right) + left[nsegments].size() + right[0].size() != 0)
+			tick++;
+
 		boolean goLeft = true;
 		int totLeft = 0;
 		int totRight = 0;
-
+		
 		switch (this.state) {
 
 		// set all lights to green -> turn off lights if in danger -> flush if
@@ -96,7 +104,7 @@ public class Player extends oneway.sim.Player {
 			while (counter != nsegments) {
 				LinkedList<Integer> m = new LinkedList<Integer>();
 				m = chainOfDanger(indanger, counter);
-				System.out.printf("what is the size of  m %d\n", m.size());
+				//System.out.printf("what is the size of  m %d\n", m.size());
 				//if (m.size()>0)
 					//System.out.printf("the first one inside m is %d", m.get(0));
 				if (m.size() == 1) {
@@ -394,7 +402,7 @@ public class Player extends oneway.sim.Player {
 
 		trafficFlownow = trafficFlow(car);
 
-		if (left[nsegments - 1].size() == 0
+		if (left[nsegments-1].size() == 0
 				&& trafficFlownow[nsegments - 1] >= 0) {
 			rlights[nsegments - 1] = true;
 		}
@@ -413,7 +421,7 @@ public class Player extends oneway.sim.Player {
 
 		// if no car is queued to go right
 		// might as well open up right parking lot
-		if (sumRight(car, right) == 0)
+		if (sumRight(car, right) + right[0].size() == 0)
 			llights[nsegments - 1] = true;
 		else
 			llights[nsegments - 1] = false;
@@ -455,7 +463,7 @@ public class Player extends oneway.sim.Player {
 		// finally check if anycar is queued to go left,
 		// if not, then might as well open up left parking lot
 
-		if (sumLeft(car, left) == 0)
+		if (sumLeft(car, left) + left[nsegments].size() == 0)
 			rlights[0] = true;
 		else
 			rlights[0] = false;
