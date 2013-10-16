@@ -279,7 +279,8 @@ public class Player extends oneway.sim.Player {
 					if (car1.segment == i && car1.dir > 0) {
 						for (MovingCar car2 : movingCars) {
 							if (car2.segment == i + 2 && car2.dir < 0) {
-								if ((nblocks[i] - car1.block + 1) == car2.block) {
+								if ((nblocks[i] - car1.block - 1) == car2.block) {
+									System.out.println("KKKKK  "+(nblocks[i] - car1.block + 1));
 									if (totLeft > totRight) {
 										rlights[i + 1] = false;
 										System.out.printf(
@@ -326,8 +327,7 @@ public class Player extends oneway.sim.Player {
 			if (rlights[i] && right[i].size() > 0) {
 				for (MovingCar car : movingCars) {
 					if (car.segment == i + 1 && car.dir < 0 && car.block == 0) {
-						if (capacity[i] == (right[i].size() + left[i - 1]
-								.size())){
+						if (capacity[i] == (right[i].size() + left[i].size())){
 							rlights[i] = false; System.out.printf("g rlights[%d] = false\n", i);
 						}
 						else if (totLeft > totRight) {

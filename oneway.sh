@@ -6,7 +6,7 @@ for i in `seq 1 10`;
         do
 javac CreateDistribution.java
 javac Tester.java
-java Tester medium short
+java Tester xlarge short
 
 javac oneway/sim/Oneway.java
 cat config.txt >> output.txt

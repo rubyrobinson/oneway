@@ -66,7 +66,13 @@ public class CreateDistribution {
 			}
 		}
 		content += "\n";
-	if(parkingLotType.equals("large")){
+	if(parkingLotType.equals("xlarge")){
+		for(int i=0; i<numParkingLots; i++){
+			int parkingCapacity = 50 + (int) (Math.random() * 100);
+			content += parkingCapacity + " ";
+		}
+	}
+	else if(parkingLotType.equals("large")){
 		for(int i=0; i<numParkingLots; i++){
 			int parkingCapacity = 10 + (int) (Math.random() * 20);
 			content += parkingCapacity + " ";
