@@ -379,6 +379,14 @@ public class Player extends oneway.sim.Player {
 			}
 		}
 
+/*		// safety check for 0 capacity parking lots
+		for(int i =1; i<nsegments; i++){
+			if(capacity[i] == 0){
+				llights[i-1] = true;
+				rlights[i] = true;
+			}
+		}
+*/
 	}
 
 	// check if the segment has traffic
