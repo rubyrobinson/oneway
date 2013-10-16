@@ -52,6 +52,11 @@ public class Player extends oneway.sim.Player {
 			this.flush = false;
 		}
 
+		for(int i=0; i<capacity.length; i++){
+			if(capacity[i] < 3)
+				this.flush = true;
+		}
+
 		//force NORMAL for 2 ticks	
 		if(tick<3){
 			this.state = States.NORMAL;
